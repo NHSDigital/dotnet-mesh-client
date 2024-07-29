@@ -8,7 +8,7 @@
 using Microsoft.AspNetCore.Http;
 using System.IO.Compression;
 
-namespace NHS.MESH.Client.Helpers.ConetentHelpers
+namespace NHS.MESH.Client.Helpers.ContentHelpers
 {
     /// <summary>Provides helper functions for content split.</summary>
     public static class ContentSplitHelper

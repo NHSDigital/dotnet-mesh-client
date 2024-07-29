@@ -5,7 +5,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-using NHS.MESH.Client.Helpers.ConetentHelpers;
+using NHS.MESH.Client.Helpers.ContentHelpers;
 
 namespace NHS.MESH.Client.Helpers.AuthHelpers
 {
@@ -18,7 +18,7 @@ namespace NHS.MESH.Client.Helpers.AuthHelpers
             string mailboxId,
             string? timestamp = null,
             string password = "password",
-            string sharedKey = "Banana",
+            string sharedKey = "TestKey",
             string? nonce = null,
             int nonceCount = 0)
         {

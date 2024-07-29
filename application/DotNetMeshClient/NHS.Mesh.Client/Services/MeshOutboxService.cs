@@ -9,7 +9,7 @@ using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Helpers.AuthHelpers;
-using NHS.MESH.Client.Helpers.ConetentHelpers;
+using NHS.MESH.Client.Helpers.ContentHelpers;
 using NHS.MESH.Client.Models;
 using Microsoft.AspNetCore.Http;
 using System.IO;
@@ -25,13 +25,13 @@ namespace NHS.MESH.Client.Services
     public class MeshOutboxService : IMeshOutboxService
     {
         /// <summary>The MESH Connect Configuration.</summary>
-        private readonly IMeshConnectConfiguration meshConnectConfiguration;
+        private readonly IMeshConnectConfiguration _meshConnectConfiguration;
 
         /// <summary>The MESH Connect Client.</summary>
-        private readonly IMeshConnectClient meshConnectClient;
+        private readonly IMeshConnectClient _meshConnectClient;
 
         /// <summary>The MESH Operation service.</summary>
-        private readonly IMeshOperationService meshOperationService;
+        private readonly IMeshOperationService _meshOperationService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshOutboxService"/> class.
@@ -41,9 +41,9 @@ namespace NHS.MESH.Client.Services
         /// <param name="meshOperationService">The MESH Operation service.</param>
         public MeshOutboxService(IMeshConnectConfiguration meshConnectConfiguration, IMeshConnectClient meshConnectClient, IMeshOperationService meshOperationService)
         {
-            this.meshConnectConfiguration = meshConnectConfiguration;
-            this.meshConnectClient = meshConnectClient;
-            this.meshOperationService = meshOperationService;
+            _meshConnectConfiguration = meshConnectConfiguration;
+            _meshConnectClient = meshConnectClient;
+            _meshOperationService = meshOperationService;
         }
 
         /// <summary>
@@ -60,11 +60,8 @@ namespace NHS.MESH.Client.Services
             // Validations
             if (string.IsNullOrWhiteSpace(fromMailboxId)) { throw new ArgumentNullException(nameof(fromMailboxId)); }
             if (string.IsNullOrWhiteSpace(toMailboxId)) { throw new ArgumentNullException(nameof(toMailboxId)); }
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiBaseUrl)); }
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiOutboxUriPath)); }
-
-            var handshake = await this.meshOperationService.MeshHandsahkeAsync(fromMailboxId);
-            if (handshake.Key != HttpStatusCode.OK) { return handshake; }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiOutboxUriPath)); }
 
             // The HTTP Request Message
             var httpRequestMessage = new HttpRequestMessage
@@ -73,7 +70,7 @@ namespace NHS.MESH.Client.Services
             };
 
             // API URL
-            var uri = new Uri($"{this.meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{this.meshConnectConfiguration.MeshApiOutboxUriPath}");
+            var uri = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}");
             httpRequestMessage.RequestUri = uri;
 
             // Headers
@@ -113,15 +110,15 @@ namespace NHS.MESH.Client.Services
                 var content = new StreamContent(memoryStream)
                 {
                     Headers =
-            {
-                ContentType = new MediaTypeHeaderValue("application/octet-stream"),
-                ContentEncoding = { "gzip" }
-            }
+                    {
+                        ContentType = new MediaTypeHeaderValue("application/octet-stream"),
+                        ContentEncoding = { "gzip" }
+                    }
                 };
 
                 httpRequestMessage.Content = content;
 
-                var meshResponse = await this.meshConnectClient.SendRequestAsync(httpRequestMessage);
+                var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
                 return meshResponse;
             }
@@ -142,11 +139,8 @@ namespace NHS.MESH.Client.Services
             // Validations
             if (string.IsNullOrWhiteSpace(fromMailboxId)) { throw new ArgumentNullException(nameof(fromMailboxId)); }
             if (string.IsNullOrWhiteSpace(toMailboxId)) { throw new ArgumentNullException(nameof(toMailboxId)); }
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiBaseUrl)); }
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiOutboxUriPath)); }
-
-            var handshake = await this.meshOperationService.MeshHandsahkeAsync(fromMailboxId);
-            if (handshake.Key != HttpStatusCode.OK) { return handshake; }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiOutboxUriPath)); }
 
             // The HTTP Request Message
             var httpRequestMessage = new HttpRequestMessage
@@ -155,7 +149,7 @@ namespace NHS.MESH.Client.Services
             };
 
             // API URL
-            var uri = new Uri($"{this.meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{this.meshConnectConfiguration.MeshApiOutboxUriPath}");
+            var uri = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}");
             httpRequestMessage.RequestUri = uri;
 
             // Headers
@@ -185,14 +179,14 @@ namespace NHS.MESH.Client.Services
                 var content = new StreamContent(fileStream)
                 {
                     Headers =
-            {
-                ContentType = new MediaTypeHeaderValue("application/octet-stream")
-            }
+                      {
+                          ContentType = new MediaTypeHeaderValue("application/octet-stream")
+                      }
                 };
 
                 httpRequestMessage.Content = content;
 
-                var meshResponse = await this.meshConnectClient.SendRequestAsync(httpRequestMessage);
+                var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
                 return meshResponse;
             }
@@ -213,11 +207,8 @@ namespace NHS.MESH.Client.Services
             // Validations
             if (string.IsNullOrWhiteSpace(fromMailboxId)) { throw new ArgumentNullException(nameof(fromMailboxId)); }
             if (string.IsNullOrWhiteSpace(toMailboxId)) { throw new ArgumentNullException(nameof(toMailboxId)); }
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiBaseUrl)); }
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiOutboxUriPath)); }
-
-            var handshake = await this.meshOperationService.MeshHandsahkeAsync(fromMailboxId);
-            if (handshake.Key != HttpStatusCode.OK) { return handshake; }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiOutboxUriPath)); }
 
             var chunkedFiles = await ContentSplitHelper.SplitFileToMemoryStreams(file);
             var sendMessageResponse = new SendMessageResponse();
@@ -266,10 +257,10 @@ namespace NHS.MESH.Client.Services
                 if (i == 0)
                 {
                     // API URL
-                    var uri = new Uri(this.meshConnectConfiguration.MeshApiBaseUrl + "/" + fromMailboxId + "/" + this.meshConnectConfiguration.MeshApiOutboxUriPath);
+                    var uri = new Uri(_meshConnectConfiguration.MeshApiBaseUrl + "/" + fromMailboxId + "/" + _meshConnectConfiguration.MeshApiOutboxUriPath);
                     httpRequestMessage.RequestUri = uri;
 
-                    var meshResponse = await this.meshConnectClient.SendRequestAsync(httpRequestMessage);
+                    var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
                     if (meshResponse.Key == HttpStatusCode.Accepted || meshResponse.Key == HttpStatusCode.OK)
                     {
@@ -284,10 +275,10 @@ namespace NHS.MESH.Client.Services
                 else
                 {
                     // API URL
-                    var uri = new Uri(this.meshConnectConfiguration.MeshApiBaseUrl + "/" + fromMailboxId + "/" + this.meshConnectConfiguration.MeshApiOutboxUriPath + "/" + sendMessageResponse?.MessageId + "/" + (i + 1).ToString());
+                    var uri = new Uri(_meshConnectConfiguration.MeshApiBaseUrl + "/" + fromMailboxId + "/" + _meshConnectConfiguration.MeshApiOutboxUriPath + "/" + sendMessageResponse?.MessageId + "/" + (i + 1).ToString());
                     httpRequestMessage.RequestUri = uri;
 
-                    var meshResponse = await this.meshConnectClient.SendRequestAsync(httpRequestMessage);
+                    var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
                     if (meshResponse.Key != HttpStatusCode.OK)
                     {
@@ -314,12 +305,9 @@ namespace NHS.MESH.Client.Services
         {
             // Validations
             if (string.IsNullOrWhiteSpace(mailboxId)) { throw new ArgumentNullException(nameof(mailboxId)); }
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiBaseUrl)); }
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiOutboxUriPath)); }
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiTrackMessageUriPath)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiTrackMessageUriPath)); }
-
-            var handshake = await this.meshOperationService.MeshHandsahkeAsync(mailboxId);
-            if (handshake.Key != HttpStatusCode.OK) { return handshake; }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiOutboxUriPath)); }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiTrackMessageUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiTrackMessageUriPath)); }
 
             // The HTTP Request Message
             var httpRequestMessage = new HttpRequestMessage
@@ -328,7 +316,7 @@ namespace NHS.MESH.Client.Services
             };
 
             // API URL
-            var uri = new Uri($"{this.meshConnectConfiguration.MeshApiBaseUrl}/{mailboxId}/{this.meshConnectConfiguration.MeshApiOutboxUriPath}/{this.meshConnectConfiguration.MeshApiTrackMessageUriPath}/{messageId}");
+            var uri = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{mailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}/{_meshConnectConfiguration.MeshApiTrackMessageUriPath}/{messageId}");
             httpRequestMessage.RequestUri = uri;
 
             // Headers
@@ -343,7 +331,7 @@ namespace NHS.MESH.Client.Services
             httpRequestMessage.Headers.Add("Mex-OSArchitecture", "x86_64");
 
             // Get Messages
-            var meshResponse = await this.meshConnectClient.SendRequestAsync(httpRequestMessage);
+            var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
             return new KeyValuePair<HttpStatusCode, string>(meshResponse.Key, meshResponse.Value);
         }

@@ -9,7 +9,9 @@ using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Helpers.AuthHelpers;
+using NHS.MESH.Client.Models;
 using System.Net;
+using System.Text.Json;
 
 namespace NHS.MESH.Client.Services
 {
@@ -17,10 +19,10 @@ namespace NHS.MESH.Client.Services
     public class MeshOperationService : IMeshOperationService
     {
         /// <summary>The MESH Connect Configuration.</summary>
-        private readonly IMeshConnectConfiguration meshConnectConfiguration;
+        private readonly IMeshConnectConfiguration _meshConnectConfiguration;
 
         /// <summary>The MESH Connect Client.</summary>
-        private readonly IMeshConnectClient meshConnectClient;
+        private readonly IMeshConnectClient _meshConnectClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshOperationService"/> class.
@@ -29,8 +31,8 @@ namespace NHS.MESH.Client.Services
         /// <param name="meshConnectClient">The MESH Connect Client.</param>
         public MeshOperationService(IMeshConnectConfiguration meshConnectConfiguration, IMeshConnectClient meshConnectClient)
         {
-            this.meshConnectConfiguration = meshConnectConfiguration;
-            this.meshConnectClient = meshConnectClient;
+            _meshConnectConfiguration = meshConnectConfiguration;
+            _meshConnectClient = meshConnectClient;
         }
 
         /// <summary>
@@ -40,12 +42,12 @@ namespace NHS.MESH.Client.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        public async Task<KeyValuePair<HttpStatusCode, string>> MeshHandsahkeAsync(string mailboxId)
+        public async Task<HandshakeResponse> MeshHandshakeAsync(string mailboxId)
         {
             // Validations
             if (string.IsNullOrWhiteSpace(mailboxId)) { throw new ArgumentNullException(nameof(mailboxId)); }
 
-            if (string.IsNullOrWhiteSpace(this.meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(this.meshConnectConfiguration.MeshApiBaseUrl)); }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
 
             // The HTTP Request Message
             var httpRequestMessage = new HttpRequestMessage();
@@ -53,7 +55,7 @@ namespace NHS.MESH.Client.Services
             var meshResponse = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.InternalServerError, "Handshake failed!");
 
             // API URL
-            var uri = new Uri(this.meshConnectConfiguration.MeshApiBaseUrl + "/" + mailboxId);
+            var uri = new Uri(_meshConnectConfiguration.MeshApiBaseUrl + "/" + mailboxId);
             httpRequestMessage.RequestUri = uri;
 
             // Request Method
@@ -70,25 +72,30 @@ namespace NHS.MESH.Client.Services
             httpRequestMessage.Headers.Add("Mex-JavaVersion", "openjdk-11u");
             httpRequestMessage.Headers.Add("Mex-OSArchitecture", "x86_64");
 
-            // Initiate Handshake
-            for (var i = 0; i < this.meshConnectConfiguration.MaxRetries; i++)
+            meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+
+            if(meshResponse.Key == HttpStatusCode.Forbidden)
             {
-                try
-                {
-                    meshResponse = await this.meshConnectClient.SendRequestAsync(httpRequestMessage);
-
-                    if (meshResponse.Key == HttpStatusCode.OK)
-                    {
-                        return meshResponse;
-                    }
-                }
-                catch (HttpRequestException e)
-                {
-                    throw;
-                }
+                var errorContent = getErrorResponse(meshResponse.Value);
+                throw new Exception(errorContent.errorDescription);
             }
+            else if(meshResponse.Key == HttpStatusCode.BadRequest)
+            {
+                var errorContent = getErrorResponse(meshResponse.Value);
+                throw new Exception(errorContent.errorDescription);
 
-            return meshResponse;
+            }
+            else if(meshResponse.Key != HttpStatusCode.OK)
+            {
+                var errorContent = getErrorResponse(meshResponse.Value);
+                throw new Exception(errorContent.errorDescription);
+            }
+            var handshakeResponse = JsonSerializer.Deserialize<HandshakeResponse>(meshResponse.Value);
+            return handshakeResponse;
+        }
+        private APIErrorResponse getErrorResponse(string content){
+            return JsonSerializer.Deserialize<APIErrorResponse>(content);
         }
     }
+
 }
