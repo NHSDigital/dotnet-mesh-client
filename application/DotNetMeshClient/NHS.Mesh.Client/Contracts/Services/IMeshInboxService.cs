@@ -6,6 +6,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System.Net;
+using NHS.MESH.Client.Models;
 
 namespace NHS.MESH.Client.Contracts.Services
 {
@@ -19,7 +20,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<KeyValuePair<HttpStatusCode, string>> GetMessagesAsync(string mailboxId);
+        Task<MeshResponse<CheckInboxResponse>> GetMessagesAsync(string mailboxId);
 
         /// <summary>
         /// Get message by message Id from MESH Inbox asynchronously.
@@ -29,7 +30,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<KeyValuePair<HttpStatusCode, string>> GetMessageByIdAsync(string mailboxId, string messageId);
+        Task<MeshResponse<GetMessageResponse>> GetMessageByIdAsync(string mailboxId, string messageId);
 
         /// <summary>
         /// Get message meta data by message Id from MESH Inbox asynchronously.
@@ -39,7 +40,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<KeyValuePair<HttpStatusCode, string>> GetHeadMessageByIdAsync(string mailboxId, string messageId);
+        Task<MeshResponse<HeadMessageResponse>> GetHeadMessageByIdAsync(string mailboxId, string messageId);
 
         /// <summary>
         /// Acknowledge sent message by message Id from MESH Inbox asynchronously.
@@ -49,6 +50,6 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<KeyValuePair<HttpStatusCode, string>> AcknowledgeMessageByIdAsync(string mailboxId, string messageId);
+        Task<MeshResponse<AcknowledgeMessageResponse>> AcknowledgeMessageByIdAsync(string mailboxId, string messageId);
     }
 }

@@ -21,6 +21,6 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<HandshakeResponse> MeshHandshakeAsync(string mailboxId);
+        Task<MeshResponse<HandshakeResponse>> MeshHandshakeAsync(string mailboxId);
     }
 }

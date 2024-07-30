@@ -7,8 +7,10 @@
 
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
+using NHS.MESH.Client.Models;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 
 namespace NHS.MESH.Client.Clients
 {
@@ -19,18 +21,18 @@ namespace NHS.MESH.Client.Clients
         private const string MeshConnectClientName = "MeshConnectClient";
 
         /// <summary>The HTTP client factory.</summary>
-        private readonly IHttpClientFactory httpClientFactory;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>The MESH Connect Configuration.</summary>
-        private readonly IMeshConnectConfiguration meshConnectConfiguration;
+        private readonly IMeshConnectConfiguration _meshConnectConfiguration;
 
         /// <summary>Initializes a new instance of the <see cref="MeshConnectClient"/> class.</summary>
         /// <param name="httpClientFactory">The HTTP Client.</param>
         /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
         public MeshConnectClient(IHttpClientFactory httpClientFactory, IMeshConnectConfiguration meshConnectConfiguration)
         {
-            this.httpClientFactory = httpClientFactory;
-            this.meshConnectConfiguration = meshConnectConfiguration;
+            _httpClientFactory = httpClientFactory;
+            _meshConnectConfiguration = meshConnectConfiguration;
         }
 
         /// <summary>
@@ -38,28 +40,55 @@ namespace NHS.MESH.Client.Clients
         /// </summary>
         /// <param name="httpRequestMessage">The HTTP Request Message.</param>
         /// <returns></returns>
-        public async Task<KeyValuePair<HttpStatusCode, string>> SendRequestAsync(HttpRequestMessage httpRequestMessage)
+        public async Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage)
         {
-            try
+            return await SendHttpRequest(httpRequestMessage);
+        }
+
+        public async Task<KeyValuePair<HttpStatusCode,FileAttachment>> GetFileRequestAsync(HttpRequestMessage httpRequestMessage)
+        {
+            var response = await SendHttpRequest(httpRequestMessage);
+            var responseContent = await response.Content.ReadAsByteArrayAsync();
+
+            var fileName = response.Headers.FirstOrDefault(i => i.Key == "mex-filename").Value.FirstOrDefault();
+
+            var file = new FileAttachment
             {
-                var timeInSeconds = this.meshConnectConfiguration.TimeoutInSeconds;
+                Content = responseContent,
+                FileName = fileName
 
-                var httpClient = httpClientFactory.CreateClient(MeshConnectClientName);
+            };
 
-                httpClient.Timeout = TimeSpan.FromSeconds(timeInSeconds);
+            return new KeyValuePair<HttpStatusCode, FileAttachment>(response.StatusCode, file);
+        }
 
-                var httpResponseMessage = httpClient.SendAsync(httpRequestMessage);
 
-                var response = httpResponseMessage.Result;
 
-                var responseContent = await response.Content.ReadAsStringAsync();
+        private async Task<HttpResponseMessage> SendHttpRequest(HttpRequestMessage httpRequestMessage)
+        {
+            httpRequestMessage = addHeaders(httpRequestMessage);
 
-                return new KeyValuePair<HttpStatusCode, string>(response.StatusCode, responseContent);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
+            var timeInSeconds = _meshConnectConfiguration.TimeoutInSeconds;
+
+            var httpClient = _httpClientFactory.CreateClient(MeshConnectClientName);
+
+            httpClient.Timeout = TimeSpan.FromSeconds(timeInSeconds);
+
+            var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
+
+            return httpResponseMessage;
+        }
+
+        private HttpRequestMessage addHeaders(HttpRequestMessage httpRequestMessage)
+        {
+            OperatingSystem operatingSystem = Environment.OSVersion;
+            var osArchitecture = Environment.Is64BitOperatingSystem ? "x86_64" : "x86_32";
+            httpRequestMessage.Headers.Add("mex-clientversion","ApiDocs==0.0.1");
+            httpRequestMessage.Headers.Add("mex-osarchitecture",osArchitecture);
+            httpRequestMessage.Headers.Add("mex-osname",operatingSystem.Platform.ToString());
+            httpRequestMessage.Headers.Add("mex-osversion",operatingSystem.VersionString);
+
+            return httpRequestMessage;
         }
     }
 }

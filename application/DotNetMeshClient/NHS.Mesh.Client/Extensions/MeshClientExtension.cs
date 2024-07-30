@@ -10,9 +10,11 @@ using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Services;
 
 
-namespace NHS.MESH.Client{
+namespace NHS.MESH.Client
+{
   public static class MeshClientServiceExtension{
-    public static IServiceCollection AddMeshClient(this IServiceCollection services, Action<IMeshConnectConfiguration> options){
+    public static IServiceCollection AddMeshClient(this IServiceCollection services, Action<IMeshConnectConfiguration> options)
+    {
 
         IMeshConnectConfiguration meshConnectConfiguration = new MeshConnectConfiguration
         {
@@ -23,15 +25,15 @@ namespace NHS.MESH.Client{
             ProxyUseDefaultCredentials = true,
             MeshApiInboxUriPath = "inbox",
             MeshApiOutboxUriPath = "outbox",
-
-
-
         };
 
         options(meshConnectConfiguration);
-        if(string.IsNullOrWhiteSpace(meshConnectConfiguration.MeshApiBaseUrl)){
+
+        if(string.IsNullOrWhiteSpace(meshConnectConfiguration.MeshApiBaseUrl))
+        {
           throw new MissingFieldException("MeshApiBaseUrl was not set");
         }
+
         services.AddSingleton(meshConnectConfiguration);
         services.AddTransient<IMeshConnectClient,MeshConnectClient>();
 

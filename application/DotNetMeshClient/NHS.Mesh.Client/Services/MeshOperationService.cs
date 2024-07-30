@@ -5,9 +5,11 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
+using NHS.MESH.Client.Helpers;
 using NHS.MESH.Client.Helpers.AuthHelpers;
 using NHS.MESH.Client.Models;
 using System.Net;
@@ -42,7 +44,7 @@ namespace NHS.MESH.Client.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        public async Task<HandshakeResponse> MeshHandshakeAsync(string mailboxId)
+        public async Task<MeshResponse<HandshakeResponse>> MeshHandshakeAsync(string mailboxId)
         {
             // Validations
             if (string.IsNullOrWhiteSpace(mailboxId)) { throw new ArgumentNullException(nameof(mailboxId)); }
@@ -52,7 +54,7 @@ namespace NHS.MESH.Client.Services
             // The HTTP Request Message
             var httpRequestMessage = new HttpRequestMessage();
 
-            var meshResponse = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.InternalServerError, "Handshake failed!");
+
 
             // API URL
             var uri = new Uri(_meshConnectConfiguration.MeshApiBaseUrl + "/" + mailboxId);
@@ -66,36 +68,14 @@ namespace NHS.MESH.Client.Services
             httpRequestMessage.Headers.Add("authorization", authHeader);
             httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
             httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
-            httpRequestMessage.Headers.Add("Mex-ClientVersion", "ApiDocs==0.0.1");
-            httpRequestMessage.Headers.Add("Mex-OSName", "Linux");
-            httpRequestMessage.Headers.Add("Mex-OSVersion", "#44~18.04.2-Ubuntu");
-            httpRequestMessage.Headers.Add("Mex-JavaVersion", "openjdk-11u");
-            httpRequestMessage.Headers.Add("Mex-OSArchitecture", "x86_64");
 
-            meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+            var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
-            if(meshResponse.Key == HttpStatusCode.Forbidden)
-            {
-                var errorContent = getErrorResponse(meshResponse.Value);
-                throw new Exception(errorContent.errorDescription);
-            }
-            else if(meshResponse.Key == HttpStatusCode.BadRequest)
-            {
-                var errorContent = getErrorResponse(meshResponse.Value);
-                throw new Exception(errorContent.errorDescription);
+            var response = await ResponseHelper.CreateMeshResponse<HandshakeResponse>(meshResponse, async _ => JsonSerializer.Deserialize<HandshakeResponse>(await _.Content.ReadAsStringAsync()));
 
-            }
-            else if(meshResponse.Key != HttpStatusCode.OK)
-            {
-                var errorContent = getErrorResponse(meshResponse.Value);
-                throw new Exception(errorContent.errorDescription);
-            }
-            var handshakeResponse = JsonSerializer.Deserialize<HandshakeResponse>(meshResponse.Value);
-            return handshakeResponse;
+            return response;
         }
-        private APIErrorResponse getErrorResponse(string content){
-            return JsonSerializer.Deserialize<APIErrorResponse>(content);
-        }
+
     }
 
 }

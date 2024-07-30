@@ -3,7 +3,7 @@ using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client;
 using System.Net;
 
-namespace NHS.Mesh.Client.IntegrationTests;
+namespace NHS.MESH.Client.IntegrationTests;
 
 [TestClass]
 public class MeshOperationServiceIntegrationTests

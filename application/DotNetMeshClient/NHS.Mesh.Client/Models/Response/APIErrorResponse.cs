@@ -1,7 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace NHS.MESH.Client.Models;
 
 public class APIErrorResponse{
-    public string errorEvent {get; set;}
-    public string errorCode {get; set;}
-    public string errorDescription {get; set;}
+    [JsonPropertyName("errorEvent")]
+    public string? ErrorEvent {get; set;}
+    [JsonPropertyName("errorCode")]
+    public string? ErrorCode {get; set;}
+    [JsonPropertyName("errorDescription")]
+    public string ErrorDescription {get; set;}
 }

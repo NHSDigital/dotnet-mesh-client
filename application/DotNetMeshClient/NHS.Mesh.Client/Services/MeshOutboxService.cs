@@ -55,7 +55,7 @@ namespace NHS.MESH.Client.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        public async Task<KeyValuePair<HttpStatusCode, string>> SendCompressedMessageAsync(string fromMailboxId, string toMailboxId, IFormFile file)
+        public async Task<KeyValuePair<HttpStatusCode, string>> SendCompressedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file)
         {
             // Validations
             if (string.IsNullOrWhiteSpace(fromMailboxId)) { throw new ArgumentNullException(nameof(fromMailboxId)); }
@@ -77,11 +77,6 @@ namespace NHS.MESH.Client.Services
             var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(fromMailboxId);
             httpRequestMessage.Headers.Add("authorization", authHeader);
             httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
-            httpRequestMessage.Headers.Add("Mex-ClientVersion", "ApiDocs==0.0.1");
-            httpRequestMessage.Headers.Add("Mex-OSName", "Linux");
-            httpRequestMessage.Headers.Add("Mex-OSVersion", "#44~18.04.2-Ubuntu");
-            httpRequestMessage.Headers.Add("Mex-JavaVersion", "openjdk-11u");
-            httpRequestMessage.Headers.Add("Mex-OSArchitecture", "x86_64");
             httpRequestMessage.Headers.Add("mex-from", fromMailboxId);
             httpRequestMessage.Headers.Add("mex-to", toMailboxId);
             httpRequestMessage.Headers.Add("mex-workflowid", "API-DOCS-TEST");

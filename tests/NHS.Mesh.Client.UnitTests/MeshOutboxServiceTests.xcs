@@ -1,4 +1,4 @@
-namespace NHS.Mesh.Client.UnitTests;
+namespace NHS.MESH.Client.UnitTests;
 
 using System.Net;
 using Moq;

@@ -1,4 +1,4 @@
-namespace NHS.Mesh.Client.UnitTests;
+namespace NHS.MESH.Client.UnitTests;
 
 using System.Net;
 using System.Text.Json;
@@ -29,6 +29,8 @@ public class MeshOperationServiceTests
 
         //arrange
         Exception testException = null;
+        OperatingSystem operatingSystem = Environment.OSVersion;
+
         // Act
         try
         {
@@ -86,19 +88,17 @@ public class MeshOperationServiceTests
         string jsonString  = JsonSerializer.Serialize(responseData);
 
         var meshApiBaseUrl = "https://api.mesh.com";
-        var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "Handshake successful");
+        var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, jsonString);
 
         _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns(meshApiBaseUrl);
         _meshConnectConfiguration.SetupGet(c => c.MaxRetries).Returns(3);
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(Task.FromResult(jsonString));
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
 
         // Act
         var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
 
         // Assert
         Assert.AreEqual(mailboxId,result.MailboxId);
-        // Assert.AreEqual(HttpStatusCode.OK,result.Key);
-        // Assert.AreEqual("Handshake successful",result.Value);
     }
 
     [TestMethod]
@@ -107,21 +107,29 @@ public class MeshOperationServiceTests
         // Arrange
         var mailboxId = "valid-mailbox-id";
         var meshApiBaseUrl = "https://api.mesh.com";
-        var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.InternalServerError, "Handshake failed!");
+        var errorDescription = "Service unavailable";
+        var errorString = UnitTestHelpers.CreateMeshErrorResponseJsonString(null, null,errorDescription);
+
+        Exception testException = null;
+
 
         _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns(meshApiBaseUrl);
         _meshConnectConfiguration.SetupGet(c => c.MaxRetries).Returns(3);
-        _meshConnectClient.SetupSequence(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>()))
-            .ReturnsAsync(new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.ServiceUnavailable, "Service unavailable"))
-            .ReturnsAsync(new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.ServiceUnavailable, "Service unavailable"))
-            .ReturnsAsync(response);
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>()))
+            .ReturnsAsync(new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.ServiceUnavailable, errorString));
 
         // Act
-        var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
+        try
+        {
+            var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
+        }
+        catch(Exception ex)
+        {
+            testException = ex;
+            Assert.AreEqual(ex.Message,errorDescription);
+        }
 
-        // Assert
-        Assert.AreEqual(HttpStatusCode.InternalServerError,result.Key);
-        Assert.AreEqual("Handshake failed!",result.Value);
+        Assert.IsNotNull(testException);
     }
 
     [TestMethod]

@@ -6,6 +6,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System.Net;
+using NHS.MESH.Client.Models;
 
 namespace NHS.MESH.Client.Contracts.Clients
 {
@@ -17,6 +18,13 @@ namespace NHS.MESH.Client.Contracts.Clients
         /// </summary>
         /// <param name="httpRequestMessage">The HTTP Request Message.</param>
         /// <returns></returns>
-        Task<KeyValuePair<HttpStatusCode, string>> SendRequestAsync(HttpRequestMessage httpRequestMessage);
+        Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage);
+        /// <summary>
+        /// Asynchronously sends a request using the route configuration specified.
+        /// Returns a FileAttachment Object Containing the requested File
+        /// </summary>
+        /// <param name="httpRequestMessage">The HTTP Request Message.</param>
+        /// <returns></returns>
+        Task<KeyValuePair<HttpStatusCode,FileAttachment>> GetFileRequestAsync(HttpRequestMessage httpRequestMessage);
     }
 }
