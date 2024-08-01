@@ -12,7 +12,6 @@ public static class ResponseHelper
     {
         if(httpResponseMessage.StatusCode == HttpStatusCode.OK)
         {
-
             return new MeshResponse<TSuccess>
             {
                 IsSuccessful = true,

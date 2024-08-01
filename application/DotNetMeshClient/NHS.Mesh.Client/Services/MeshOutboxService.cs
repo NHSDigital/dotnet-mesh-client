@@ -18,6 +18,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using NHS.MESH.Client.Helpers;
 
 namespace NHS.MESH.Client.Services
 {
@@ -55,7 +56,7 @@ namespace NHS.MESH.Client.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        public async Task<KeyValuePair<HttpStatusCode, string>> SendCompressedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file)
+        public async Task<MeshResponse<SendMessageResponse>> SendCompressedMessageAsync(string fromMailboxId, string toMailboxId,string workflowId, FileAttachment file)
         {
             // Validations
             if (string.IsNullOrWhiteSpace(fromMailboxId)) { throw new ArgumentNullException(nameof(fromMailboxId)); }
@@ -79,8 +80,8 @@ namespace NHS.MESH.Client.Services
             httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
             httpRequestMessage.Headers.Add("mex-from", fromMailboxId);
             httpRequestMessage.Headers.Add("mex-to", toMailboxId);
-            httpRequestMessage.Headers.Add("mex-workflowid", "API-DOCS-TEST");
-            httpRequestMessage.Headers.Add("mex-filename", "none");
+            httpRequestMessage.Headers.Add("mex-workflowid", workflowId);
+            httpRequestMessage.Headers.Add("mex-filename", file.FileName);
             httpRequestMessage.Headers.Add("mex-localid", "api-docs-bob-greets-alice");
             httpRequestMessage.Headers.Add("Mex-Content-Compressed", "Y");
             httpRequestMessage.Headers.Add("Mex-Content-Encrypted", "N");
@@ -94,7 +95,7 @@ namespace NHS.MESH.Client.Services
             {
                 using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
                 {
-                    using (var fileStream = file.OpenReadStream())
+                    using (var fileStream = new MemoryStream(file.Content))
                     {
                         await fileStream.CopyToAsync(gzipStream);
                     }
@@ -115,7 +116,7 @@ namespace NHS.MESH.Client.Services
 
                 var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
-                return meshResponse;
+                return await ResponseHelper.CreateMeshResponse<SendMessageResponse>(meshResponse,async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
             }
         }
 
@@ -129,7 +130,7 @@ namespace NHS.MESH.Client.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        public async Task<KeyValuePair<HttpStatusCode, string>> SendUnCompressedMessageAsync(string fromMailboxId, string toMailboxId, IFormFile file)
+        public async Task<MeshResponse<SendMessageResponse>> SendUnCompressedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file)
         {
             // Validations
             if (string.IsNullOrWhiteSpace(fromMailboxId)) { throw new ArgumentNullException(nameof(fromMailboxId)); }
@@ -151,15 +152,10 @@ namespace NHS.MESH.Client.Services
             var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(fromMailboxId);
             httpRequestMessage.Headers.Add("authorization", authHeader);
             httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
-            httpRequestMessage.Headers.Add("Mex-ClientVersion", "ApiDocs==0.0.1");
-            httpRequestMessage.Headers.Add("Mex-OSName", "Linux");
-            httpRequestMessage.Headers.Add("Mex-OSVersion", "#44~18.04.2-Ubuntu");
-            httpRequestMessage.Headers.Add("Mex-JavaVersion", "openjdk-11u");
-            httpRequestMessage.Headers.Add("Mex-OSArchitecture", "x86_64");
             httpRequestMessage.Headers.Add("mex-from", fromMailboxId);
             httpRequestMessage.Headers.Add("mex-to", toMailboxId);
             httpRequestMessage.Headers.Add("mex-workflowid", "API-DOCS-TEST");
-            httpRequestMessage.Headers.Add("mex-filename", "none");
+            httpRequestMessage.Headers.Add("mex-filename", file.FileName);
             httpRequestMessage.Headers.Add("mex-localid", "api-docs-bob-greets-alice");
             httpRequestMessage.Headers.Add("Mex-Content-Compressed", "N");
             httpRequestMessage.Headers.Add("Mex-Content-Encrypted", "N");
@@ -169,9 +165,8 @@ namespace NHS.MESH.Client.Services
             httpRequestMessage.Headers.Add("Mex-MessageType", "Data");
 
             // Body
-            using (var fileStream = file.OpenReadStream())
-            {
-                var content = new StreamContent(fileStream)
+
+                var content = new ByteArrayContent(file.Content)
                 {
                     Headers =
                       {
@@ -183,8 +178,10 @@ namespace NHS.MESH.Client.Services
 
                 var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
-                return meshResponse;
-            }
+
+
+                return await ResponseHelper.CreateMeshResponse<SendMessageResponse>(meshResponse,async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
+
         }
 
 
@@ -197,7 +194,7 @@ namespace NHS.MESH.Client.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        public async Task<KeyValuePair<HttpStatusCode, string>> SendChunkedMessageAsync(string fromMailboxId, string toMailboxId, IFormFile file)
+        public async Task<MeshResponse<SendMessageResponse>> SendChunkedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file)
         {
             // Validations
             if (string.IsNullOrWhiteSpace(fromMailboxId)) { throw new ArgumentNullException(nameof(fromMailboxId)); }
@@ -205,7 +202,7 @@ namespace NHS.MESH.Client.Services
             if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
             if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiOutboxUriPath)); }
 
-            var chunkedFiles = await ContentSplitHelper.SplitFileToMemoryStreams(file);
+            var chunkedFiles = await ContentSplitHelper.SplitFileToMemoryStreams(new MemoryStream(file.Content),_meshConnectConfiguration.ChunkSize);
             var sendMessageResponse = new SendMessageResponse();
             var responseKey = HttpStatusCode.InternalServerError;
 
@@ -223,11 +220,6 @@ namespace NHS.MESH.Client.Services
 
                 // General Headers
                 httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
-                httpRequestMessage.Headers.Add("Mex-ClientVersion", "ApiDocs==0.0.1");
-                httpRequestMessage.Headers.Add("Mex-OSName", "Linux");
-                httpRequestMessage.Headers.Add("Mex-OSVersion", "#44~18.04.2-Ubuntu");
-                httpRequestMessage.Headers.Add("Mex-JavaVersion", "openjdk-11u");
-                httpRequestMessage.Headers.Add("Mex-OSArchitecture", "x86_64");
                 // Send Message Headers
                 httpRequestMessage.Headers.Add("mex-from", fromMailboxId);
                 httpRequestMessage.Headers.Add("mex-to", toMailboxId);
@@ -286,8 +278,6 @@ namespace NHS.MESH.Client.Services
 
             return new KeyValuePair<HttpStatusCode, string>(responseKey, response);
         }
-
-
         /// <summary>
         /// Get message status by message Id from MESH Inbox asynchronously.
         /// </summary>
@@ -296,7 +286,7 @@ namespace NHS.MESH.Client.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        public async Task<KeyValuePair<HttpStatusCode, string>> TrackMessageByIdAsync(string mailboxId, string messageId)
+        public async Task<MeshResponse<TrackOutboxResponse>> TrackMessageByIdAsync(string mailboxId, string messageId)
         {
             // Validations
             if (string.IsNullOrWhiteSpace(mailboxId)) { throw new ArgumentNullException(nameof(mailboxId)); }
@@ -311,24 +301,22 @@ namespace NHS.MESH.Client.Services
             };
 
             // API URL
-            var uri = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{mailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}/{_meshConnectConfiguration.MeshApiTrackMessageUriPath}/{messageId}");
+            var uri = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{mailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}/{_meshConnectConfiguration.MeshApiTrackMessageUriPath}?={messageId}");
             httpRequestMessage.RequestUri = uri;
 
             // Headers
             var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
             httpRequestMessage.Headers.Add("authorization", authHeader);
             httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
-            httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
-            httpRequestMessage.Headers.Add("Mex-ClientVersion", "ApiDocs==0.0.1");
-            httpRequestMessage.Headers.Add("Mex-OSName", "Linux");
-            httpRequestMessage.Headers.Add("Mex-OSVersion", "#44~18.04.2-Ubuntu");
-            httpRequestMessage.Headers.Add("Mex-JavaVersion", "openjdk-11u");
-            httpRequestMessage.Headers.Add("Mex-OSArchitecture", "x86_64");
 
             // Get Messages
             var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
-            return new KeyValuePair<HttpStatusCode, string>(meshResponse.Key, meshResponse.Value);
+            return await ResponseHelper.CreateMeshResponse<TrackOutboxResponse>(meshResponse,async _ => JsonSerializer.Deserialize<TrackOutboxResponse>(await _.Content.ReadAsStringAsync()));
+        }
+
+        private async Task<HttpResponseMessage> SendMessage(){
+
         }
     }
 }

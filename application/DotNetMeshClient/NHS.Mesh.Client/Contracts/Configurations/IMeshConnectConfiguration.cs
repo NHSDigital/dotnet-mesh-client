@@ -51,5 +51,7 @@ namespace NHS.MESH.Client.Contracts.Configurations
 
         /// <summary>Gets or sets a value indicating whether proxy use default credentials.</summary>
         bool ProxyUseDefaultCredentials { get; set; }
+        /// <summary>Gets the chunk size in bytes for sending chunked messages 19Mb limit outside of HSCN 100Mb limit within</summary>
+        long ChunkSize { get; set; }
     }
 }

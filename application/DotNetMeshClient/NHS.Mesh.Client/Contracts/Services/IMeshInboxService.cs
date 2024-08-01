@@ -32,6 +32,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <exception cref="Exception">The general Exception.</exception>
         Task<MeshResponse<GetMessageResponse>> GetMessageByIdAsync(string mailboxId, string messageId);
 
+        Task<MeshResponse<GetChunkedMessageResponse>> GetChunkedMessageByIdAsync(string mailboxId, string messageId);
         /// <summary>
         /// Get message meta data by message Id from MESH Inbox asynchronously.
         /// </summary>

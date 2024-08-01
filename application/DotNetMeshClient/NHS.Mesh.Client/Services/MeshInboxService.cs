@@ -12,6 +12,8 @@ using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Helpers.AuthHelpers;
 using System.Text.Json;
+using System.ComponentModel;
+using System.Net;
 
 namespace NHS.MESH.Client.Services
 {
@@ -90,40 +92,13 @@ namespace NHS.MESH.Client.Services
             if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
             if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiInboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiInboxUriPath)); }
 
-            // The HTTP Request Message
-            var httpRequestMessage = new HttpRequestMessage();
-
-            // API URL
-            var uri = new Uri(_meshConnectConfiguration.MeshApiBaseUrl + "/" + mailboxId + "/" + _meshConnectConfiguration.MeshApiInboxUriPath + "/" + messageId);
-            httpRequestMessage.RequestUri = uri;
-
-            // Request Method
-            httpRequestMessage.Method = HttpMethod.Get;
-
-            // Headers
-            var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-            httpRequestMessage.Headers.Add("authorization", authHeader);
-            httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
-            httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
-
-            // Get Messages
-            var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+            var meshResponse = await GetSingleMessageAsync(mailboxId, messageId);
 
             var result = await ResponseHelper.CreateMeshResponse<GetMessageResponse>(meshResponse,async _ => {
                     return new GetMessageResponse
                     {
-                        fileAttachment = new FileAttachment
-                        {
-                            FileName =  _.Headers.GetHeaderItemValue("mex-filename"),
-                            Content = await _.Content.ReadAsByteArrayAsync()
-                        },
-                        messageMetaData = new MessageMetaData
-                        {
-                            WorkflowID = _.Headers.GetHeaderItemValue("mex-workflowid"),
-                            ToMailbox = _.Headers.GetHeaderItemValue("mex-to"),
-                            FromMailbox = _.Headers.GetHeaderItemValue("mex-from"),
-                            MessageId = _.Headers.GetHeaderItemValue("mex-messageid")
-                        }
+                        fileAttachment = await FileHelpers.CreateFileAttachment(_),
+                        messageMetaData = FileHelpers.CreateMessageMetaData(_)
 
                     };
                 });
@@ -131,7 +106,57 @@ namespace NHS.MESH.Client.Services
             return result;
 
 
+        }
+
+
+        public async Task<MeshResponse<GetChunkedMessageResponse>> GetChunkedMessageByIdAsync(string mailboxId, string messageId){
+            if (string.IsNullOrWhiteSpace(mailboxId)) { throw new ArgumentNullException(nameof(mailboxId)); }
+            if (string.IsNullOrWhiteSpace(messageId)) { throw new ArgumentNullException(nameof(messageId)); }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
+            if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiInboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiInboxUriPath)); }
+
+             // The HTTP Request Message
+            var initialMessage = await GetSingleMessageAsync(mailboxId,messageId);
+
+            if(initialMessage.StatusCode == HttpStatusCode.OK)
+            {
+                throw new InvalidOperationException($"MessageId: {messageId} in MailBox: {mailboxId} is not a chunked message, Use the GetMessageByIdAsync method to get this message");
             }
+            else if(initialMessage.StatusCode != HttpStatusCode.PartialContent)
+            {
+                return await ResponseHelper.CreateMeshResponse<GetChunkedMessageResponse>(initialMessage,_ => null);
+            }
+
+            var chunkRange = initialMessage.Headers.GetHeaderItemValue("mex-chunk-range");
+
+            var chunkRangeInts = FileHelpers.ParseChunkRange(chunkRange);
+            List<FileAttachment> chunks = new List<FileAttachment>();
+            chunks.Add(await FileHelpers.CreateFileAttachment(initialMessage));
+
+            for(int i  = 2; i<= chunkRangeInts.chunkLength; i++)
+            {
+                var meshResponse = await GetMessageChunkAsync(mailboxId,messageId,i);
+                if(meshResponse.StatusCode == HttpStatusCode.OK){
+                    throw new InvalidOperationException($"MessageId: {messageId} in MailBox: {mailboxId} is not a chunked message, Use the GetMessageByIdAsync method to get this message");
+                }
+                if(meshResponse.StatusCode != HttpStatusCode.PartialContent){
+                    return await ResponseHelper.CreateMeshResponse<GetChunkedMessageResponse>(initialMessage,_ => null);
+                }
+
+                var chunk = await FileHelpers.CreateFileAttachment(meshResponse);
+                chunks.Add(chunk);
+            }
+
+            return new MeshResponse<GetChunkedMessageResponse>{
+                IsSuccessful = true,
+                Response = new GetChunkedMessageResponse
+                {
+                    fileAttachments = chunks,
+                    messageMetaData = FileHelpers.CreateMessageMetaData(initialMessage)
+                }
+
+            };
+        }
 
         /// <summary>
         /// Get message meta data by message Id from MESH Inbox asynchronously.
@@ -226,6 +251,40 @@ namespace NHS.MESH.Client.Services
             return await ResponseHelper.CreateMeshResponse<AcknowledgeMessageResponse>(meshResponse, async _ => JsonSerializer.Deserialize<AcknowledgeMessageResponse>(await _.Content.ReadAsStringAsync()));
 
         }
+
+        #region PrivateMethods
+        private Task<HttpResponseMessage> GetSingleMessageAsync(string mailboxId, string messageId)
+        {
+            var uri = new Uri(_meshConnectConfiguration.MeshApiBaseUrl + "/" + mailboxId + "/" + _meshConnectConfiguration.MeshApiInboxUriPath + "/" + messageId);
+            return GetMessageAsync(uri,mailboxId);
+
+        }
+
+        private Task<HttpResponseMessage> GetMessageChunkAsync(string mailboxId, string messageId, int ChunkNumber)
+        {
+            var uri = new Uri(_meshConnectConfiguration.MeshApiBaseUrl + "/" + mailboxId + "/" + _meshConnectConfiguration.MeshApiInboxUriPath + "/" + messageId + "/" + ChunkNumber.ToString());
+            return GetMessageAsync(uri,mailboxId);
+        }
+
+        private async Task<HttpResponseMessage> GetMessageAsync(Uri uri, string mailboxId)
+        {
+            var httpRequestMessage = new HttpRequestMessage();
+
+            httpRequestMessage.RequestUri = uri;
+
+            // Request Method
+            httpRequestMessage.Method = HttpMethod.Get;
+
+            // Headers
+            var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
+            httpRequestMessage.Headers.Add("authorization", authHeader);
+            httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
+
+            // Get Messages
+            return await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+
+        }
+        #endregion
 
   }
 }

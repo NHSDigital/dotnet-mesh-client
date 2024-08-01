@@ -6,6 +6,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using Microsoft.AspNetCore.Http;
+using NHS.MESH.Client.Models;
 using System.IO.Compression;
 
 namespace NHS.MESH.Client.Helpers.ContentHelpers
@@ -19,11 +20,11 @@ namespace NHS.MESH.Client.Helpers.ContentHelpers
         /// <param name="inputFilePath">The input Path.</param>
         /// <param name="chunkSize">The file size.</param>
         /// <returns></returns>
-        public static async Task<List<MemoryStream>> SplitFileToMemoryStreams(IFormFile file, long chunkSize = 90 * 1024 * 1024)
+        public static async Task<List<MemoryStream>> SplitFileToMemoryStreams(Stream stream, long chunkSize = 19 * 1024 * 1024)
         {
             List<MemoryStream> compressedChunks = new List<MemoryStream>();
 
-            using (var fileStream = file.OpenReadStream())
+            using (var fileStream = stream.BeginRead())
             {
                 byte[] buffer = new byte[chunkSize];
                 int bytesRead;

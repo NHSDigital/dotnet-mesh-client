@@ -19,12 +19,5 @@ namespace NHS.MESH.Client.Contracts.Clients
         /// <param name="httpRequestMessage">The HTTP Request Message.</param>
         /// <returns></returns>
         Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage);
-        /// <summary>
-        /// Asynchronously sends a request using the route configuration specified.
-        /// Returns a FileAttachment Object Containing the requested File
-        /// </summary>
-        /// <param name="httpRequestMessage">The HTTP Request Message.</param>
-        /// <returns></returns>
-        Task<KeyValuePair<HttpStatusCode,FileAttachment>> GetFileRequestAsync(HttpRequestMessage httpRequestMessage);
     }
 }

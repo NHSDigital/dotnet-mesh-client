@@ -25,6 +25,7 @@ namespace NHS.MESH.Client
             ProxyUseDefaultCredentials = true,
             MeshApiInboxUriPath = "inbox",
             MeshApiOutboxUriPath = "outbox",
+            ChunkSize = 19 * 1024 * 1024
         };
 
         options(meshConnectConfiguration);

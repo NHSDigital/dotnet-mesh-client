@@ -6,6 +6,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using Microsoft.AspNetCore.Http;
+using NHS.MESH.Client.Models;
 using System.Net;
 
 namespace NHS.MESH.Client.Contracts.Services
@@ -22,7 +23,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<KeyValuePair<HttpStatusCode, string>> SendCompressedMessageAsync(string fromMailboxId, string toMailboxId, IFormFile file);
+        Task<MeshResponse<SendMessageResponse>> SendCompressedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file);
 
         /// <summary>
         /// Send messages asynchronously to the MESH API.
@@ -33,7 +34,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<KeyValuePair<HttpStatusCode, string>> SendUnCompressedMessageAsync(string fromMailboxId, string toMailboxId, IFormFile file);
+        Task<MeshResponse<SendMessageResponse>> SendUnCompressedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file);
 
         /// <summary>
         /// Send chunked messages asynchronously to the MESH API.
@@ -44,7 +45,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<KeyValuePair<HttpStatusCode, string>> SendChunkedMessageAsync(string fromMailboxId, string toMailboxId, IFormFile file);
+        Task<MeshResponse<SendMessageResponse>> SendChunkedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file);
 
         /// <summary>
         /// Get message status by message Id from MESH Inbox asynchronously.
@@ -54,6 +55,6 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<KeyValuePair<HttpStatusCode, string>> TrackMessageByIdAsync(string mailboxId, string messageId);
+        Task<MeshResponse<TrackOutboxResponse>> TrackMessageByIdAsync(string mailboxId, string messageId);
     }
 }

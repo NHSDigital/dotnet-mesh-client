@@ -45,24 +45,6 @@ namespace NHS.MESH.Client.Clients
             return await SendHttpRequest(httpRequestMessage);
         }
 
-        public async Task<KeyValuePair<HttpStatusCode,FileAttachment>> GetFileRequestAsync(HttpRequestMessage httpRequestMessage)
-        {
-            var response = await SendHttpRequest(httpRequestMessage);
-            var responseContent = await response.Content.ReadAsByteArrayAsync();
-
-            var fileName = response.Headers.FirstOrDefault(i => i.Key == "mex-filename").Value.FirstOrDefault();
-
-            var file = new FileAttachment
-            {
-                Content = responseContent,
-                FileName = fileName
-
-            };
-
-            return new KeyValuePair<HttpStatusCode, FileAttachment>(response.StatusCode, file);
-        }
-
-
 
         private async Task<HttpResponseMessage> SendHttpRequest(HttpRequestMessage httpRequestMessage)
         {
@@ -73,6 +55,7 @@ namespace NHS.MESH.Client.Clients
             var httpClient = _httpClientFactory.CreateClient(MeshConnectClientName);
 
             httpClient.Timeout = TimeSpan.FromSeconds(timeInSeconds);
+
 
             var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
 
