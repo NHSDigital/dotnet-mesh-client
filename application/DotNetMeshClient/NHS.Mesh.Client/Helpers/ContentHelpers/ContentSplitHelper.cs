@@ -20,30 +20,32 @@ namespace NHS.MESH.Client.Helpers.ContentHelpers
         /// <param name="inputFilePath">The input Path.</param>
         /// <param name="chunkSize">The file size.</param>
         /// <returns></returns>
-        public static async Task<List<MemoryStream>> SplitFileToMemoryStreams(Stream stream, long chunkSize = 19 * 1024 * 1024)
+        public static async Task<List<byte[]>> SplitFileToMemoryStreams(byte[] fileData, int chunkSize = 19 * 1024 * 1024)
         {
-            List<MemoryStream> compressedChunks = new List<MemoryStream>();
+            List<byte[]> chunks = new List<byte[]>();
 
-            using (var fileStream = stream.BeginRead())
+
+            int offset = 0;
+            var memoryStream = new MemoryStream(fileData);
+
+            while(true)
             {
                 byte[] buffer = new byte[chunkSize];
-                int bytesRead;
-
-                while ((bytesRead = await fileStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                int bytesRead = await memoryStream.ReadAsync(buffer,offset,chunkSize);
+                if(bytesRead == 0)
                 {
-                    var chunkMemoryStream = new MemoryStream();
-                    using (var gzipStream = new GZipStream(chunkMemoryStream, CompressionMode.Compress, true))
-                    {
-                        gzipStream.Write(buffer, 0, bytesRead);
-                    }
-
-                    // Reset the position of the MemoryStream for reading later
-                    chunkMemoryStream.Position = 0;
-                    compressedChunks.Add(chunkMemoryStream);
+                    return chunks;
                 }
+                chunks.Add(buffer);
+                if(bytesRead < chunkSize)
+                {
+                    return chunks;
+                }
+                offset += bytesRead;
             }
 
-            return compressedChunks;
+
+
         }
     }
 }

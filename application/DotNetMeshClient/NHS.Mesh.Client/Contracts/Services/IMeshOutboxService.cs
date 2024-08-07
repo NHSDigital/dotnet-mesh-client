@@ -23,7 +23,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<MeshResponse<SendMessageResponse>> SendCompressedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file);
+        Task<MeshResponse<SendMessageResponse>> SendCompressedMessageAsync(string fromMailboxId, string toMailboxId, string workflowId, FileAttachment file, string? localId = null, string? subject = null, bool includeChecksum = false);
 
         /// <summary>
         /// Send messages asynchronously to the MESH API.
@@ -34,7 +34,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<MeshResponse<SendMessageResponse>> SendUnCompressedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file);
+        Task<MeshResponse<SendMessageResponse>> SendUnCompressedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file, string workflowId, string? localId, string? subject, bool includeChecksum = false);
 
         /// <summary>
         /// Send chunked messages asynchronously to the MESH API.
@@ -45,7 +45,7 @@ namespace NHS.MESH.Client.Contracts.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        Task<MeshResponse<SendMessageResponse>> SendChunkedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file);
+        Task<MeshResponse<SendMessageResponse>> SendChunkedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file, string workflowId, string? localId, string? subject, bool includeChecksum = false);
 
         /// <summary>
         /// Get message status by message Id from MESH Inbox asynchronously.
