@@ -37,7 +37,7 @@ public class MeshOperationServiceIntegrationTests
         var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
 
         //assert
-        Assert.AreEqual(mailboxId,result.MailboxId);
+        Assert.AreEqual(mailboxId,result.Response.MailboxId);
     }
 
     [TestMethod]

@@ -31,7 +31,8 @@ public class MeshInboxServiceIntegrationTests
         //act
         var result = await _meshInboxService.GetMessagesAsync(mailboxId);
         //assert
-        Assert.AreEqual(HttpStatusCode.OK,result.Key);
+        Assert.IsTrue(result.IsSuccessful);
+        Assert.AreEqual(1,result.Response.Messages.Count());
     }
     [TestMethod]
     public async Task CheckNonExistentInboxForMessages_Failure()
@@ -41,7 +42,8 @@ public class MeshInboxServiceIntegrationTests
         //act
         var result = await _meshInboxService.GetMessagesAsync(mailboxId);
         //assert
-        Assert.AreEqual(HttpStatusCode.Forbidden,result.Key);
+        Assert.IsFalse(result.IsSuccessful);
+        Assert.AreEqual("Mailbox id does not match token",result.Error.ErrorDescription);
     }
 
 

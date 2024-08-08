@@ -84,7 +84,7 @@ namespace NHS.MESH.Client.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        public async Task<MeshResponse<SendMessageResponse>> SendUnCompressedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file, string workflowId, string? localId, string? subject, bool includeChecksum = false)
+        public async Task<MeshResponse<SendMessageResponse>> SendUnCompressedMessageAsync(string fromMailboxId, string toMailboxId, string workflowId, FileAttachment file, string? localId = null, string? subject =null, bool includeChecksum = false)
         {
             // Validations
             if (string.IsNullOrWhiteSpace(fromMailboxId)) { throw new ArgumentNullException(nameof(fromMailboxId)); }
@@ -124,7 +124,7 @@ namespace NHS.MESH.Client.Services
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">The Arugument Null Exception.</exception>
         /// <exception cref="Exception">The general Exception.</exception>
-        public async Task<MeshResponse<SendMessageResponse>> SendChunkedMessageAsync(string fromMailboxId, string toMailboxId, FileAttachment file, string workflowId, string? localId, string? subject, bool includeChecksum = false)
+        public async Task<MeshResponse<SendMessageResponse>> SendChunkedMessageAsync(string fromMailboxId, string toMailboxId, string workflowId, FileAttachment file, string? localId = null, string? subject =null, bool includeChecksum = false)
         {
             // Validations
             if (string.IsNullOrWhiteSpace(fromMailboxId)) { throw new ArgumentNullException(nameof(fromMailboxId)); }

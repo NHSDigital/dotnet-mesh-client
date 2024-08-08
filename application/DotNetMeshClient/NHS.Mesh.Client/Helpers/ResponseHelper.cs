@@ -28,9 +28,20 @@ public static class ResponseHelper
 
     }
 
-    public static string GetHeaderItemValue(this HttpResponseHeaders headers, string key)
+    public static string? GetHeaderItemValue(this HttpResponseHeaders headers, string key)
     {
-        return headers.FirstOrDefault(h => h.Key == key).Value.FirstOrDefault();
+        if(headers == null)
+        {
+            return null;
+        }
+
+        var header = headers.FirstOrDefault(h => h.Key == key);
+
+        if(header.Key == null){
+            return null;
+        }
+
+        return header.Value.FirstOrDefault();
     }
 
     private static async Task<APIErrorResponse> MapErrorResponse(HttpResponseMessage httpResponseMessage)

@@ -88,7 +88,7 @@ public class MeshOperationServiceTests
         string jsonString  = JsonSerializer.Serialize(responseData);
 
         var meshApiBaseUrl = "https://api.mesh.com";
-        var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, jsonString);
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<HandshakeResponse>(new HandshakeResponse{MailboxId = mailboxId},HttpStatusCode.OK);
 
         _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns(meshApiBaseUrl);
         _meshConnectConfiguration.SetupGet(c => c.MaxRetries).Returns(3);
@@ -98,7 +98,7 @@ public class MeshOperationServiceTests
         var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
 
         // Assert
-        Assert.AreEqual(mailboxId,result.MailboxId);
+        Assert.AreEqual(mailboxId,result.Response.MailboxId);
     }
 
     [TestMethod]
@@ -110,26 +110,23 @@ public class MeshOperationServiceTests
         var errorDescription = "Service unavailable";
         var errorString = UnitTestHelpers.CreateMeshErrorResponseJsonString(null, null,errorDescription);
 
+        var httpResponseMock = UnitTestHelpers.CreateMockHttpResponseMessage<string>(errorString,HttpStatusCode.ServiceUnavailable);
+
         Exception testException = null;
 
 
         _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns(meshApiBaseUrl);
         _meshConnectConfiguration.SetupGet(c => c.MaxRetries).Returns(3);
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>()))
-            .ReturnsAsync(new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.ServiceUnavailable, errorString));
+            .ReturnsAsync(httpResponseMock);
 
         // Act
-        try
-        {
-            var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
-        }
-        catch(Exception ex)
-        {
-            testException = ex;
-            Assert.AreEqual(ex.Message,errorDescription);
-        }
 
-        Assert.IsNotNull(testException);
+        var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
+
+
+        Assert.IsFalse(result.IsSuccessful);
+        Assert.AreEqual(errorDescription,result.Error.ErrorDescription);
     }
 
     [TestMethod]

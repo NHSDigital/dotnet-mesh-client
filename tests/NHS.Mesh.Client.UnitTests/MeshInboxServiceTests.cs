@@ -1,13 +1,16 @@
 namespace NHS.MESH.Client.UnitTests;
 
 using System.Net;
+using System.Runtime.InteropServices;
 using Microsoft.VisualBasic;
 using Moq;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Helpers.AuthHelpers;
+using NHS.MESH.Client.Models;
 using NHS.MESH.Client.Services;
+using NuGet.Frameworks;
 
 [TestClass]
 public class MeshInboxServiceTests
@@ -18,9 +21,6 @@ public class MeshInboxServiceTests
         /// <summary>The MESH Connect Client.</summary>
         private readonly Mock<IMeshConnectClient> _meshConnectClient;
 
-        /// <summary>The MESH Operation Service.</summary>
-        private readonly Mock<IMeshOperationService> _meshOperationService;
-
         /// <summary>The MESH Inbox Service.</summary>
         private readonly IMeshInboxService _meshInboxService;
 
@@ -28,12 +28,10 @@ public class MeshInboxServiceTests
     {
             _meshConnectConfiguration = new Mock<IMeshConnectConfiguration>(MockBehavior.Strict);
             _meshConnectClient = new Mock<IMeshConnectClient>(MockBehavior.Strict);
-            _meshOperationService = new Mock<IMeshOperationService>(MockBehavior.Strict);
 
             _meshInboxService = new MeshInboxService(
                 _meshConnectConfiguration.Object,
-                _meshConnectClient.Object,
-                _meshOperationService.Object
+                _meshConnectClient.Object
             );
 
             // Setup default values for configuration mock
@@ -123,38 +121,27 @@ public class MeshInboxServiceTests
     }
 
     [TestMethod]
-    public async Task GetMessagesAsync_HandshakeFails_ReturnsHandshakeError()
-    {
-        //arrange
-        var mailboxId = "valid-mailbox-id";
-        var handshakeResult = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.Unauthorized, "Unauthorized");
-        _meshOperationService.Setup(s => s.MeshHandshakeAsync(mailboxId)).ReturnsAsync(handshakeResult);
-
-        //act
-        var result = await _meshInboxService.GetMessagesAsync(mailboxId);
-
-        //assert
-        Assert.AreEqual(HttpStatusCode.Unauthorized,result.Key);
-        Assert.AreEqual("Unauthorized",result.Value);
-    }
-
-    [TestMethod]
     public async Task GetMessagesAsync_ValidInputs_ReturnsSuccessfulResponse()
     {
         //arrange
         var mailboxId = "valid-mailbox-id";
         var handshakeResult = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "OK");
-        var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "Success");
 
-        _meshOperationService.Setup(s => s.MeshHandshakeAsync(mailboxId)).ReturnsAsync(handshakeResult);
+        var checkInboxResponse = new CheckInboxResponse
+        {
+            Messages = new List<string>{"MessageId"}
+        };
+
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<CheckInboxResponse>(checkInboxResponse,HttpStatusCode.OK);
+
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
 
         //act
         var result = await _meshInboxService.GetMessagesAsync(mailboxId);
 
         //assert
-        Assert.AreEqual(HttpStatusCode.OK,result.Key);
-        Assert.AreEqual("Success",result.Value);
+        Assert.IsTrue(result.IsSuccessful);
+        Assert.IsTrue(result.Response.Messages.Count(i => i == "MessageId") == 1);
     }
 
     [TestMethod]
@@ -188,8 +175,6 @@ public class MeshInboxServiceTests
         // Arrange
         Exception testException = null;
         var mailboxId = "valid-mailbox-id";
-        _meshOperationService.Setup(s => s.MeshHandshakeAsync(mailboxId))
-            .ReturnsAsync(new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "OK"));
 
         // Act
         try
@@ -213,18 +198,35 @@ public class MeshInboxServiceTests
         //arrange
         var mailboxId = "valid-mailbox-id";
         var messageId = "valid-message-id";
-        var handshakeResult = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "OK");
-        var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "Success");
 
-        _meshOperationService.Setup(s => s.MeshHandshakeAsync(mailboxId)).ReturnsAsync(handshakeResult);
+        //var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "Success");
+
+        var getMessageReponse = new GetMessageResponse
+        {
+            fileAttachment = new FileAttachment(),
+            messageMetaData = new MessageMetaData
+            {
+                ToMailbox = mailboxId,
+                MessageId = messageId,
+            }
+        };
+
+        var headers = new Dictionary<string,string>(){
+            {"mex-messagetype","DATA"},
+            {"mex-to",mailboxId},
+            {"mex-messageid",messageId}
+        };
+
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<GetMessageResponse>(getMessageReponse,HttpStatusCode.OK,headers);
+
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
 
         //act
         var result = await _meshInboxService.GetMessageByIdAsync(mailboxId, messageId);
 
         //assert
-        Assert.AreEqual(HttpStatusCode.OK,result.Key);
-        Assert.AreEqual("Success",result.Value);
+        Assert.IsTrue(result.IsSuccessful);
+        Assert.AreEqual(messageId,result.Response.messageMetaData.MessageId);
 
     }
 
@@ -234,22 +236,33 @@ public class MeshInboxServiceTests
         //arrange
         var mailboxId = "valid-mailbox-id";
         var messageId = "valid-message-id";
-        var handshakeResult = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "OK");
-        var headResponse = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "Head Success");
-        var acknowledgeResponse = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "Acknowledge Success");
 
-        _meshOperationService.Setup(s => s.MeshHandshakeAsync(mailboxId)).ReturnsAsync(handshakeResult);
+        HeadMessageResponse headMessageResponse = new HeadMessageResponse
+        {
+            messageMetaData = new MessageMetaData
+            {
+                ToMailbox = mailboxId,
+                MessageId = messageId
+            }
+        };
+
+        var headers = new Dictionary<string,string>(){
+            {"mex-messagetype","DATA"},
+            {"mex-to",mailboxId},
+            {"mex-messageid",messageId}
+        };
+
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<HeadMessageResponse>(headMessageResponse,HttpStatusCode.OK,headers);
+
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.Is<HttpRequestMessage>(msg => msg.Method == HttpMethod.Head)))
-            .ReturnsAsync(headResponse);
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.Is<HttpRequestMessage>(msg => msg.Method == HttpMethod.Put)))
-            .ReturnsAsync(acknowledgeResponse);
+            .ReturnsAsync(response);
 
         //act
         var result = await _meshInboxService.GetHeadMessageByIdAsync(mailboxId, messageId);
 
         //assert
-        Assert.AreEqual(HttpStatusCode.OK,result.Key);
-        Assert.AreEqual("Acknowledge Success",result.Value);
+        Assert.IsTrue(result.IsSuccessful);
+        Assert.AreEqual(messageId,result.Response.messageMetaData.MessageId);
     }
 
 
@@ -259,10 +272,14 @@ public class MeshInboxServiceTests
         //arrange
         var mailboxId = "valid-mailbox-id";
         var messageId = "valid-message-id";
-        var handshakeResult = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "OK");
-        var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "Success");
 
-        _meshOperationService.Setup(s => s.MeshHandshakeAsync(mailboxId)).ReturnsAsync(handshakeResult);
+        var acknowledgeMessageResponse = new AcknowledgeMessageResponse
+        {
+            MessageId = messageId
+        };
+
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<AcknowledgeMessageResponse>(acknowledgeMessageResponse,HttpStatusCode.OK);
+
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.Is<HttpRequestMessage>(msg => msg.Method == HttpMethod.Put)))
             .ReturnsAsync(response);
 
@@ -270,7 +287,7 @@ public class MeshInboxServiceTests
         var result = await _meshInboxService.AcknowledgeMessageByIdAsync(mailboxId, messageId);
 
         //assert
-        Assert.AreEqual(HttpStatusCode.OK,result.Key);
-        Assert.AreEqual("Success",result.Value);
+        Assert.IsTrue(result.IsSuccessful);
+        Assert.AreEqual(messageId,result.Response.MessageId);
     }
 }
