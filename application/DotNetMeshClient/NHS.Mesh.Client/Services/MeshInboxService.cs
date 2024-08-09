@@ -115,7 +115,7 @@ namespace NHS.MESH.Client.Services
             if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
             if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiInboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiInboxUriPath)); }
 
-             // The HTTP Request Message
+
             var initialMessage = await GetSingleMessageAsync(mailboxId,messageId);
 
             if(initialMessage.StatusCode == HttpStatusCode.OK)

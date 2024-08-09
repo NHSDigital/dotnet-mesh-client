@@ -61,8 +61,8 @@ public class MeshInboxServiceTests
         catch(ArgumentNullException ex)
         {
             //assert
-             Assert.AreEqual("mailboxId",ex!.ParamName);
-             testException = ex;
+            Assert.AreEqual("mailboxId",ex!.ParamName);
+            testException = ex;
 
         }
         catch(Exception ex)
