@@ -1,3 +1,4 @@
+using System.Data.SqlTypes;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
@@ -39,5 +40,15 @@ public static class UnitTestHelpers
 
         return responseMessageMock;
 
+    }
+
+    public static byte[] CreateFakeFileContent(int length)
+    {
+        byte[] bytes = new byte[length];
+        for(int i = 0; i< length; i++)
+        {
+            bytes[i] = 0x20;
+        }
+        return bytes;
     }
 }

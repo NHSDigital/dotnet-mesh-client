@@ -60,6 +60,7 @@ namespace NHS.MESH.Client.Services
             if (string.IsNullOrWhiteSpace(toMailboxId)) { throw new ArgumentNullException(nameof(toMailboxId)); }
             if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiBaseUrl)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiBaseUrl)); }
             if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiOutboxUriPath)); }
+            if (file.Content == null || file.Content.Length == 0) {throw new ArgumentNullException(nameof(file.Content)); }
 
             var uri = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}");
 

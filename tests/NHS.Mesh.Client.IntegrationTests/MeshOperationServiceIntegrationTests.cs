@@ -45,20 +45,14 @@ public class MeshOperationServiceIntegrationTests
     {
         //arrange
         var mailboxId = "NonExistentMailBox";
-        Exception testException = null;
-        try
-        {
         //act
-            var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
+        var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
 
-        }
-        catch(Exception ex){
-            testException = ex;
-
-        }
         //assert
-        Assert.IsNotNull(testException);
-        //add check that exception is correct;
+
+        Assert.IsFalse(result.IsSuccessful);
+        Assert.AreEqual("Mailbox id does not match token",result.Error.ErrorDescription);
+
     }
 }
 

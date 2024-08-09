@@ -40,12 +40,12 @@ public class MeshInboxServiceTests
             _meshConnectConfiguration.SetupGet(c => c.MeshApiAcknowledgeUriPath).Returns("acknowledge");
 
     }
-    [TestMethod]
-    public void getAuth()//REMOVE Only to get auth token for local testing
-    {
-        var authtoken  = MeshAuthorizationHelper.GenerateAuthHeaderValue("X26ABC1",null,"password","TestKey",null,0);
-        Assert.AreEqual("aKey",authtoken);
-    }
+    // [TestMethod]
+    // public void getAuth()//REMOVE Only to get auth token for local testing
+    // {
+    //     var authtoken  = MeshAuthorizationHelper.GenerateAuthHeaderValue("X26ABC1",null,"password","TestKey",null,0);
+    //     Assert.AreEqual("aKey",authtoken);
+    // }
 
     [TestMethod]
     public async Task GetMessagesAsync_MailboxIdNull_ThrowsArgumentNullException()

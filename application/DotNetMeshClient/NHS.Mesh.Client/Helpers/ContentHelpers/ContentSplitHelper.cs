@@ -8,6 +8,7 @@
 using Microsoft.AspNetCore.Http;
 using NHS.MESH.Client.Models;
 using System.IO.Compression;
+using System.Reflection.Metadata;
 
 namespace NHS.MESH.Client.Helpers.ContentHelpers
 {
@@ -25,13 +26,15 @@ namespace NHS.MESH.Client.Helpers.ContentHelpers
             List<byte[]> chunks = new List<byte[]>();
 
 
-            int offset = 0;
+            long offset = 0;
             var memoryStream = new MemoryStream(fileData);
-
-            while(true)
+            long bytesLeft = memoryStream.Length;
+            while(bytesLeft > 0)
             {
                 byte[] buffer = new byte[chunkSize];
-                int bytesRead = await memoryStream.ReadAsync(buffer,offset,chunkSize);
+
+
+                int bytesRead = await memoryStream.ReadAsync(buffer,0,(int)Math.Min(bytesLeft,chunkSize));
                 if(bytesRead == 0)
                 {
                     return chunks;
@@ -41,8 +44,11 @@ namespace NHS.MESH.Client.Helpers.ContentHelpers
                 {
                     return chunks;
                 }
+                bytesLeft -= bytesRead;
                 offset += bytesRead;
             }
+
+            return chunks;
 
 
 
