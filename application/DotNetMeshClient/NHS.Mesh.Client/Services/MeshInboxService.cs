@@ -204,7 +204,9 @@ namespace NHS.MESH.Client.Services
                         WorkflowID = _.Headers.GetHeaderItemValue("mex-workflowid"),
                         ToMailbox = _.Headers.GetHeaderItemValue("mex-to"),
                         FromMailbox = _.Headers.GetHeaderItemValue("mex-from"),
-                        MessageId = _.Headers.GetHeaderItemValue("mex-messageid")
+                        MessageId = _.Headers.GetHeaderItemValue("mex-messageid"),
+                        FileName = _.Headers.GetHeaderItemValue("mex-filename"),
+                        MessageType = _.Headers.GetHeaderItemValue("mex-messagetype")
                     }
                 };
             });
@@ -242,7 +244,7 @@ namespace NHS.MESH.Client.Services
             // Headers
             var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
             httpRequestMessage.Headers.Add("authorization", authHeader);
-            httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
+            httpRequestMessage.Headers.Add("accept", "*/*");
             httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
 
             // Get Messages

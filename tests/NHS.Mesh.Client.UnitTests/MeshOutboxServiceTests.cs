@@ -1,6 +1,8 @@
   namespace NHS.MESH.Client.UnitTests;
 
 using System.Net;
+using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
@@ -14,6 +16,7 @@ public class MeshOutboxServiceTests
     private readonly Mock<IMeshConnectConfiguration> _meshConnectConfiguration;
     private readonly Mock<IMeshConnectClient> _meshConnectClient;
     private readonly IMeshOutboxService _meshOutboxService;
+    private readonly Mock<ILogger<MeshOutboxService>> _logger;
 
     public MeshOutboxServiceTests()
     {
@@ -22,7 +25,9 @@ public class MeshOutboxServiceTests
 
         _meshOutboxService = new MeshOutboxService(
             _meshConnectConfiguration.Object,
-            _meshConnectClient.Object
+            _meshConnectClient.Object,
+            _logger.Object
+
         );
 
         // Setup default values for configuration mock

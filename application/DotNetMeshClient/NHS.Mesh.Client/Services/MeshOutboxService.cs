@@ -19,6 +19,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using NHS.MESH.Client.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace NHS.MESH.Client.Services
 {
@@ -31,6 +32,7 @@ namespace NHS.MESH.Client.Services
         /// <summary>The MESH Connect Client.</summary>
         private readonly IMeshConnectClient _meshConnectClient;
 
+        private readonly ILogger<MeshOutboxService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeshOutboxService"/> class.
@@ -38,10 +40,11 @@ namespace NHS.MESH.Client.Services
         /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
         /// <param name="meshConnectClient">The MESH Connect Client.</param>
         /// <param name="meshOperationService">The MESH Operation service.</param>
-        public MeshOutboxService(IMeshConnectConfiguration meshConnectConfiguration, IMeshConnectClient meshConnectClient)
+        public MeshOutboxService(IMeshConnectConfiguration meshConnectConfiguration, IMeshConnectClient meshConnectClient, ILogger<MeshOutboxService> logger)
         {
             _meshConnectConfiguration = meshConnectConfiguration;
             _meshConnectClient = meshConnectClient;
+            _logger = logger;
         }
 
         /// <summary>
@@ -110,6 +113,7 @@ namespace NHS.MESH.Client.Services
 
 
             var meshResponse = await SendSingleMessage(uri,fromMailboxId,toMailboxId,workflowId,content,file.FileName,localId,subject,includeChecksum);
+
 
             return await ResponseHelper.CreateMeshResponse<SendMessageResponse>(meshResponse,async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
 
