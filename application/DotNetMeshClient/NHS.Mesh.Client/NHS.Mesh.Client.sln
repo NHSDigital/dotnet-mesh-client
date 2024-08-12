@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHS.Mesh.Client", "NHS.Mesh.Client.csproj", "{120A578D-1B0C-41E3-9B0B-0349A014AF1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHS.Mesh.Client.UnitTests", "..\..\..\tests\NHS.Mesh.Client.UnitTests\NHS.Mesh.Client.UnitTests.csproj", "{F2A10C95-C14D-4622-84DA-CA24E397FDCD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHS.Mesh.Client.IntegrationTests", "..\..\..\tests\NHS.Mesh.Client.IntegrationTests\NHS.Mesh.Client.IntegrationTests.csproj", "{145C1034-0B9D-4487-83D0-71239136F87E}"
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+            Debug|Any CPU = Debug|Any CPU
+            Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(SolutionProperties) = preSolution
+        HideSolutionNode = FALSE
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {120A578D-1B0C-41E3-9B0B-0349A014AF1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {120A578D-1B0C-41E3-9B0B-0349A014AF1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {120A578D-1B0C-41E3-9B0B-0349A014AF1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {120A578D-1B0C-41E3-9B0B-0349A014AF1C}.Release|Any CPU.Build.0 = Release|Any CPU
+        {F2A10C95-C14D-4622-84DA-CA24E397FDCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {F2A10C95-C14D-4622-84DA-CA24E397FDCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {F2A10C95-C14D-4622-84DA-CA24E397FDCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {F2A10C95-C14D-4622-84DA-CA24E397FDCD}.Release|Any CPU.Build.0 = Release|Any CPU
+        {145C1034-0B9D-4487-83D0-71239136F87E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {145C1034-0B9D-4487-83D0-71239136F87E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {145C1034-0B9D-4487-83D0-71239136F87E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {145C1034-0B9D-4487-83D0-71239136F87E}.Release|Any CPU.Build.0 = Release|Any CPU
+    EndGlobalSection
+EndGlobal
