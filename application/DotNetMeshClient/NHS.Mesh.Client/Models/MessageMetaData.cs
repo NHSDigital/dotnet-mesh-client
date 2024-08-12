@@ -1,6 +1,5 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace NHS.MESH.Client.Models;
+using System.ComponentModel.DataAnnotations;
 
 public class MessageMetaData
 {

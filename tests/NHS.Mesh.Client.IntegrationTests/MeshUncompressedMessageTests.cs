@@ -1,12 +1,13 @@
+namespace NHS.MESH.Client.IntegrationTests;
 using Microsoft.Extensions.DependencyInjection;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client;
 using System.Net;
 using NHS.MESH.Client.Models;
 
-namespace NHS.MESH.Client.IntegrationTests;
 [TestClass]
-public class MeshUncompressedMessageTests{
+public class MeshUncompressedMessageTests
+{
 
     private readonly IMeshOutboxService _meshOutboxService;
     private readonly IMeshInboxService _meshInboxService;
@@ -24,7 +25,8 @@ public class MeshUncompressedMessageTests{
     {
         var services = new ServiceCollection();
 
-        services.AddMeshClient(options => {
+        services.AddMeshClient(options =>
+        {
             options.MeshApiBaseUrl = "http://localhost:8700/messageexchange";
             options.MeshApiHanshakeUriPath = "";
         });
@@ -35,17 +37,18 @@ public class MeshUncompressedMessageTests{
         _meshOutboxService = serviceProvider.GetService<IMeshOutboxService>();
     }
     [TestMethod]
-    public async Task Send_Message(){
+    public async Task Send_Message()
+    {
 
         //arrange
-        messageContent = IntegrationTestHelpers.LoremIpsum(100,150,100,150,100);
+        messageContent = IntegrationTestHelpers.LoremIpsum(100, 150, 100, 150, 100);
         fileName = "TestFile.txt";
         contentType = "text/plain";
 
-        FileAttachment fileAttachment = IntegrationTestHelpers.CreateFileAttachment(fileName,messageContent,contentType);
+        FileAttachment fileAttachment = IntegrationTestHelpers.CreateFileAttachment(fileName, messageContent, contentType);
 
         //Act - Send Uncompressed Message
-        var sendMessageResult = await _meshOutboxService.SendUnCompressedMessageAsync(fromMailbox,toMailbox,workflowId,fileAttachment);
+        var sendMessageResult = await _meshOutboxService.SendUnCompressedMessageAsync(fromMailbox, toMailbox, workflowId, fileAttachment);
 
         //Assert - UnCompressedMessage Sent Successfully
         Assert.IsTrue(sendMessageResult.IsSuccessful);
@@ -62,32 +65,32 @@ public class MeshUncompressedMessageTests{
         Assert.IsTrue(getMessagesResult.Response.Messages.Count(i => i == messageId) == 1);
 
         //Act - Check Message Meta Data
-        var getMessageHeadResponse = await _meshInboxService.GetHeadMessageByIdAsync(toMailbox,messageId!);
+        var getMessageHeadResponse = await _meshInboxService.GetHeadMessageByIdAsync(toMailbox, messageId!);
 
         //Assert - Check Headed Message is valid
         Assert.IsTrue(getMessageHeadResponse.IsSuccessful);
-        Assert.AreEqual(workflowId,getMessageHeadResponse.Response.messageMetaData.WorkflowID);
-        Assert.AreEqual(fromMailbox,getMessageHeadResponse.Response.messageMetaData.FromMailbox);
-        Assert.AreEqual(messageId,getMessageHeadResponse.Response.messageMetaData.MessageId);
-        Assert.AreEqual(fileName,getMessageHeadResponse.Response.messageMetaData.FileName);
-        Assert.AreEqual("DATA",getMessageHeadResponse.Response.messageMetaData.MessageType);
+        Assert.AreEqual(workflowId, getMessageHeadResponse.Response.messageMetaData.WorkflowID);
+        Assert.AreEqual(fromMailbox, getMessageHeadResponse.Response.messageMetaData.FromMailbox);
+        Assert.AreEqual(messageId, getMessageHeadResponse.Response.messageMetaData.MessageId);
+        Assert.AreEqual(fileName, getMessageHeadResponse.Response.messageMetaData.FileName);
+        Assert.AreEqual("DATA", getMessageHeadResponse.Response.messageMetaData.MessageType);
 
         //Act - Download Message
-        var getMessageResponse = await _meshInboxService.GetMessageByIdAsync(toMailbox,messageId!);
+        var getMessageResponse = await _meshInboxService.GetMessageByIdAsync(toMailbox, messageId!);
 
         //Assert - check downloded message is correct
         Assert.IsTrue(getMessageResponse.IsSuccessful);
-        CollectionAssert.AreEqual(fileAttachment.Content,getMessageResponse.Response.fileAttachment.Content);
+        CollectionAssert.AreEqual(fileAttachment.Content, getMessageResponse.Response.fileAttachment.Content);
 
         string messageResponseText = System.Text.Encoding.Default.GetString(getMessageResponse.Response.fileAttachment.Content);
-        Assert.AreEqual(messageContent,messageResponseText);
+        Assert.AreEqual(messageContent, messageResponseText);
 
         //Act - Acknowledge Message
-        var acknowledgeMessageResponse = await _meshInboxService.AcknowledgeMessageByIdAsync(toMailbox,messageId!);
+        var acknowledgeMessageResponse = await _meshInboxService.AcknowledgeMessageByIdAsync(toMailbox, messageId!);
 
         //Assert
         Assert.IsTrue(acknowledgeMessageResponse.IsSuccessful);
-        Assert.AreEqual(messageId,acknowledgeMessageResponse.Response.MessageId);
+        Assert.AreEqual(messageId, acknowledgeMessageResponse.Response.MessageId);
 
 
 

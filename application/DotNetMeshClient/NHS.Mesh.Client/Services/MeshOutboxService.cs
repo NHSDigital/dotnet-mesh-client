@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MeshOutboxService.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
@@ -31,20 +31,20 @@ public class MeshOutboxService : IMeshOutboxService
     /// <summary>The MESH Connect Client.</summary>
     private readonly IMeshConnectClient _meshConnectClient;
 
-        private readonly ILogger<MeshOutboxService> _logger;
+    private readonly ILogger<MeshOutboxService> _logger;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MeshOutboxService"/> class.
-        /// </summary>
-        /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
-        /// <param name="meshConnectClient">The MESH Connect Client.</param>
-        /// <param name="meshOperationService">The MESH Operation service.</param>
-        public MeshOutboxService(IMeshConnectConfiguration meshConnectConfiguration, IMeshConnectClient meshConnectClient, ILogger<MeshOutboxService> logger)
-        {
-            _meshConnectConfiguration = meshConnectConfiguration;
-            _meshConnectClient = meshConnectClient;
-            _logger = logger;
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MeshOutboxService"/> class.
+    /// </summary>
+    /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
+    /// <param name="meshConnectClient">The MESH Connect Client.</param>
+    /// <param name="meshOperationService">The MESH Operation service.</param>
+    public MeshOutboxService(IMeshConnectConfiguration meshConnectConfiguration, IMeshConnectClient meshConnectClient, ILogger<MeshOutboxService> logger)
+    {
+        _meshConnectConfiguration = meshConnectConfiguration;
+        _meshConnectClient = meshConnectClient;
+        _logger = logger;
+    }
 
     /// <summary>
     /// Send messages asynchronously to the MESH API.

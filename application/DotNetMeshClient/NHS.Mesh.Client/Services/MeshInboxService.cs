@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MyClass.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
@@ -200,21 +200,23 @@ public class MeshInboxService : IMeshInboxService
         // Get Messages
         var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
 
-            return await ResponseHelper.CreateMeshResponse<HeadMessageResponse>(meshResponse,async _ => {
-                await Task.CompletedTask;
-                return new HeadMessageResponse{
-                    messageMetaData = new MessageMetaData
-                    {
-                        WorkflowID = _.Headers.GetHeaderItemValue("mex-workflowid"),
-                        ToMailbox = _.Headers.GetHeaderItemValue("mex-to"),
-                        FromMailbox = _.Headers.GetHeaderItemValue("mex-from"),
-                        MessageId = _.Headers.GetHeaderItemValue("mex-messageid"),
-                        FileName = _.Headers.GetHeaderItemValue("mex-filename"),
-                        MessageType = _.Headers.GetHeaderItemValue("mex-messagetype")
-                    }
-                };
-            });
-        }
+        return await ResponseHelper.CreateMeshResponse<HeadMessageResponse>(meshResponse, async _ =>
+        {
+            await Task.CompletedTask;
+            return new HeadMessageResponse
+            {
+                messageMetaData = new MessageMetaData
+                {
+                    WorkflowID = _.Headers.GetHeaderItemValue("mex-workflowid"),
+                    ToMailbox = _.Headers.GetHeaderItemValue("mex-to"),
+                    FromMailbox = _.Headers.GetHeaderItemValue("mex-from"),
+                    MessageId = _.Headers.GetHeaderItemValue("mex-messageid"),
+                    FileName = _.Headers.GetHeaderItemValue("mex-filename"),
+                    MessageType = _.Headers.GetHeaderItemValue("mex-messagetype")
+                }
+            };
+        });
+    }
 
     /// <summary>
     /// Acknowledge sent message by message Id from MESH Inbox asynchronously.
@@ -245,11 +247,11 @@ public class MeshInboxService : IMeshInboxService
         // Request Method
         httpRequestMessage.Method = HttpMethod.Put;
 
-            // Headers
-            var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-            httpRequestMessage.Headers.Add("authorization", authHeader);
-            httpRequestMessage.Headers.Add("accept", "*/*");
-            httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
+        // Headers
+        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
+        httpRequestMessage.Headers.Add("authorization", authHeader);
+        httpRequestMessage.Headers.Add("accept", "*/*");
+        httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
 
         // Get Messages
         var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
