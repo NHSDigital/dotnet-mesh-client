@@ -1,4 +1,4 @@
-  namespace NHS.MESH.Client.UnitTests;
+namespace NHS.MESH.Client.UnitTests;
 
 using System.Net;
 using Castle.Core.Logging;
@@ -45,13 +45,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendCompressedMessageAsync(null, "toMailboxId" ,"WorkflowId" , fileMock.Object);
+            await _meshOutboxService.SendCompressedMessageAsync(null, "toMailboxId", "WorkflowId", fileMock.Object);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -70,13 +70,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendCompressedMessageAsync("fromMailBox", null ,"WorkflowId" , fileMock.Object);
+            await _meshOutboxService.SendCompressedMessageAsync("fromMailBox", null, "WorkflowId", fileMock.Object);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -96,13 +96,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendCompressedMessageAsync("fromMailBox", "toMailbox" ,"WorkflowId" , fileMock.Object);
+            await _meshOutboxService.SendCompressedMessageAsync("fromMailBox", "toMailbox", "WorkflowId", fileMock.Object);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -121,13 +121,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendCompressedMessageAsync("fromMailBox", "toMailbox" ,"WorkflowId" , fileMock.Object);
+            await _meshOutboxService.SendCompressedMessageAsync("fromMailBox", "toMailbox", "WorkflowId", fileMock.Object);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -142,12 +142,12 @@ public class MeshOutboxServiceTests
         var fromMailboxId = "fromMailboxId";
         var toMailboxId = "toMailboxId";
         var workflowId = "workflowId";
-        var messageId  = "MessageId";
+        var messageId = "MessageId";
 
         var fileAttachment = new FileAttachment
         {
             FileName = "FileName",
-            Content = UnitTestHelpers.CreateFakeFileContent(2*1024*1024),
+            Content = UnitTestHelpers.CreateFakeFileContent(2 * 1024 * 1024),
             ContentType = "application/octet-stream"
 
         };
@@ -158,12 +158,12 @@ public class MeshOutboxServiceTests
 
         };
 
-        var response = UnitTestHelpers.CreateMockHttpResponseMessage<SendMessageResponse>(sendMessageResponse,HttpStatusCode.OK);
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<SendMessageResponse>(sendMessageResponse, HttpStatusCode.OK);
 
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
 
         // Act
-        var result = await _meshOutboxService.SendCompressedMessageAsync(fromMailboxId, toMailboxId,workflowId , fileAttachment);
+        var result = await _meshOutboxService.SendCompressedMessageAsync(fromMailboxId, toMailboxId, workflowId, fileAttachment);
 
         // Assert
         Assert.IsTrue(result.IsSuccessful);
@@ -180,13 +180,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendUnCompressedMessageAsync(null, "toMailboxId",  "workflowId", fileAttachment);
+            await _meshOutboxService.SendUnCompressedMessageAsync(null, "toMailboxId", "workflowId", fileAttachment);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -203,13 +203,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendUnCompressedMessageAsync("fromMailboxId", null,  "workflowId", fileAttachment);
+            await _meshOutboxService.SendUnCompressedMessageAsync("fromMailboxId", null, "workflowId", fileAttachment);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -227,13 +227,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendUnCompressedMessageAsync("fromMailboxId", "toMailboxId",  "workflowId", fileAttachment);
+            await _meshOutboxService.SendUnCompressedMessageAsync("fromMailboxId", "toMailboxId", "workflowId", fileAttachment);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -251,13 +251,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendUnCompressedMessageAsync("fromMailboxId", "toMailboxId",  "workflowId", fileAttachment);
+            await _meshOutboxService.SendUnCompressedMessageAsync("fromMailboxId", "toMailboxId", "workflowId", fileAttachment);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -272,12 +272,12 @@ public class MeshOutboxServiceTests
         var fromMailboxId = "fromMailboxId";
         var toMailboxId = "toMailboxId";
         var workflowId = "workflowId";
-        var messageId  = "MessageId";
+        var messageId = "MessageId";
 
         var fileAttachment = new FileAttachment
         {
             FileName = "FileName",
-            Content = UnitTestHelpers.CreateFakeFileContent(2*1024*1024),
+            Content = UnitTestHelpers.CreateFakeFileContent(2 * 1024 * 1024),
             ContentType = "application/octet-stream"
 
         };
@@ -287,13 +287,13 @@ public class MeshOutboxServiceTests
             MessageId = messageId
         };
 
-        var response = UnitTestHelpers.CreateMockHttpResponseMessage<SendMessageResponse>(sendMessageResponse,HttpStatusCode.OK);
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<SendMessageResponse>(sendMessageResponse, HttpStatusCode.OK);
 
-        _meshConnectConfiguration.SetupGet(i => i.ChunkSize).Returns(5*1024*1024);
+        _meshConnectConfiguration.SetupGet(i => i.ChunkSize).Returns(5 * 1024 * 1024);
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
 
         // Act
-        var result = await _meshOutboxService.SendUnCompressedMessageAsync(fromMailboxId, toMailboxId,workflowId , fileAttachment);
+        var result = await _meshOutboxService.SendUnCompressedMessageAsync(fromMailboxId, toMailboxId, workflowId, fileAttachment);
 
         // Assert
         Assert.IsTrue(result.IsSuccessful);
@@ -311,13 +311,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendChunkedMessageAsync(null, "toMailboxId","workSpaceId" , fileAttachment);
+            await _meshOutboxService.SendChunkedMessageAsync(null, "toMailboxId", "workSpaceId", fileAttachment);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -335,13 +335,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendChunkedMessageAsync("fromMailboxId", null,"workSpaceId" , fileAttachment);
+            await _meshOutboxService.SendChunkedMessageAsync("fromMailboxId", null, "workSpaceId", fileAttachment);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -359,13 +359,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendChunkedMessageAsync("fromMailboxId", "toMailboxId","workSpaceId" , fileAttachment);
+            await _meshOutboxService.SendChunkedMessageAsync("fromMailboxId", "toMailboxId", "workSpaceId", fileAttachment);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -383,13 +383,13 @@ public class MeshOutboxServiceTests
         // Act & Assert
         try
         {
-            await _meshOutboxService.SendChunkedMessageAsync("fromMailboxId", "toMailboxId","workSpaceId" , fileAttachment);
+            await _meshOutboxService.SendChunkedMessageAsync("fromMailboxId", "toMailboxId", "workSpaceId", fileAttachment);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -410,7 +410,7 @@ public class MeshOutboxServiceTests
         FileAttachment fileAttachment = new FileAttachment
         {
             FileName = "FileName",
-            Content = UnitTestHelpers.CreateFakeFileContent(9*1024*1024),
+            Content = UnitTestHelpers.CreateFakeFileContent(9 * 1024 * 1024),
             ContentType = "application/octet-stream"
         };
 
@@ -418,18 +418,18 @@ public class MeshOutboxServiceTests
         {
             MessageId = messageId
         };
-        _meshConnectConfiguration.SetupGet(i => i.ChunkSize).Returns(5*1024*1024);
+        _meshConnectConfiguration.SetupGet(i => i.ChunkSize).Returns(5 * 1024 * 1024);
 
         _meshConnectClient.Setup(i => i.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(UnitTestHelpers.CreateMockHttpResponseMessage<SendMessageResponse>(response, HttpStatusCode.OK));
 
 
         // Act
-        var result = await _meshOutboxService.SendChunkedMessageAsync(fromMailboxId, toMailboxId, workflowId,fileAttachment);
+        var result = await _meshOutboxService.SendChunkedMessageAsync(fromMailboxId, toMailboxId, workflowId, fileAttachment);
 
         // Assert
-        _meshConnectClient.Verify(i => i.SendRequestAsync(It.IsAny<HttpRequestMessage>()),Times.Exactly(2));
+        _meshConnectClient.Verify(i => i.SendRequestAsync(It.IsAny<HttpRequestMessage>()), Times.Exactly(2));
         Assert.IsTrue(result.IsSuccessful);
-        Assert.AreEqual(messageId,result.Response.MessageId);
+        Assert.AreEqual(messageId, result.Response.MessageId);
     }
 
 
@@ -443,11 +443,11 @@ public class MeshOutboxServiceTests
         {
             await _meshOutboxService.TrackMessageByIdAsync(null, "messageId");
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -467,11 +467,11 @@ public class MeshOutboxServiceTests
         {
             await _meshOutboxService.TrackMessageByIdAsync("mailboxId", "messageId");
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -491,11 +491,11 @@ public class MeshOutboxServiceTests
         {
             await _meshOutboxService.TrackMessageByIdAsync("mailboxId", "messageId");
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail();
         }
@@ -525,13 +525,13 @@ public class MeshOutboxServiceTests
         _meshConnectConfiguration.SetupGet(c => c.MeshApiInboxUriPath).Returns("inbox");
         _meshConnectConfiguration.SetupGet(c => c.MeshApiTrackMessageUriPath).Returns("track");
 
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(UnitTestHelpers.CreateMockHttpResponseMessage<TrackOutboxResponse>(trackOutboxResponse,HttpStatusCode.OK));
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(UnitTestHelpers.CreateMockHttpResponseMessage<TrackOutboxResponse>(trackOutboxResponse, HttpStatusCode.OK));
 
         // Act
         var result = await _meshOutboxService.TrackMessageByIdAsync(mailboxId, messageId);
 
         // Assert
         Assert.IsTrue(result.IsSuccessful);
-        Assert.AreEqual(messageId,result.Response.MessageId);
+        Assert.AreEqual(messageId, result.Response.MessageId);
     }
 }

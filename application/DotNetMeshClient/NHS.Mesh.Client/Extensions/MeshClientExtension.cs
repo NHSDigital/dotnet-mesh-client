@@ -1,3 +1,4 @@
+namespace NHS.MESH.Client;
 using System.Net;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,10 +10,8 @@ using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Services;
 
-
-namespace NHS.MESH.Client
+public static class MeshClientServiceExtension
 {
-  public static class MeshClientServiceExtension{
     public static IServiceCollection AddMeshClient(this IServiceCollection services, Action<IMeshConnectConfiguration> options)
     {
 
@@ -31,15 +30,15 @@ namespace NHS.MESH.Client
 
         options(meshConnectConfiguration);
 
-        if(string.IsNullOrWhiteSpace(meshConnectConfiguration.MeshApiBaseUrl))
+        if (string.IsNullOrWhiteSpace(meshConnectConfiguration.MeshApiBaseUrl))
         {
-          throw new MissingFieldException("MeshApiBaseUrl was not set");
+            throw new MissingFieldException("MeshApiBaseUrl was not set");
         }
 
         services.AddSingleton(meshConnectConfiguration);
-        services.AddTransient<IMeshConnectClient,MeshConnectClient>();
+        services.AddTransient<IMeshConnectClient, MeshConnectClient>();
 
-        if(meshConnectConfiguration.ProxyEnabled)
+        if (meshConnectConfiguration.ProxyEnabled)
         {
             services.AddHttpClient("MeshConnectClient").ConfigurePrimaryHttpMessageHandler(
                     () => new HttpClientHandler
@@ -57,14 +56,12 @@ namespace NHS.MESH.Client
                     () => new HttpClientHandler());
         }
 
-        services.AddTransient<IMeshInboxService,MeshInboxService>();
-        services.AddTransient<IMeshOutboxService,MeshOutboxService>();
-        services.AddTransient<IMeshOperationService,MeshOperationService>();
+        services.AddTransient<IMeshInboxService, MeshInboxService>();
+        services.AddTransient<IMeshOutboxService, MeshOutboxService>();
+        services.AddTransient<IMeshOperationService, MeshOperationService>();
 
 
-      return services;
+        return services;
     }
-
-  }
 
 }

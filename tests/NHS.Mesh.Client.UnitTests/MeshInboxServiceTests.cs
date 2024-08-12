@@ -15,29 +15,29 @@ using NuGet.Frameworks;
 [TestClass]
 public class MeshInboxServiceTests
 {
-        /// <summary>The MESH Connect Configuration.</summary>
-        private readonly Mock<IMeshConnectConfiguration> _meshConnectConfiguration;
+    /// <summary>The MESH Connect Configuration.</summary>
+    private readonly Mock<IMeshConnectConfiguration> _meshConnectConfiguration;
 
-        /// <summary>The MESH Connect Client.</summary>
-        private readonly Mock<IMeshConnectClient> _meshConnectClient;
+    /// <summary>The MESH Connect Client.</summary>
+    private readonly Mock<IMeshConnectClient> _meshConnectClient;
 
-        /// <summary>The MESH Inbox Service.</summary>
-        private readonly IMeshInboxService _meshInboxService;
+    /// <summary>The MESH Inbox Service.</summary>
+    private readonly IMeshInboxService _meshInboxService;
 
     public MeshInboxServiceTests()
     {
-            _meshConnectConfiguration = new Mock<IMeshConnectConfiguration>(MockBehavior.Strict);
-            _meshConnectClient = new Mock<IMeshConnectClient>(MockBehavior.Strict);
+        _meshConnectConfiguration = new Mock<IMeshConnectConfiguration>(MockBehavior.Strict);
+        _meshConnectClient = new Mock<IMeshConnectClient>(MockBehavior.Strict);
 
-            _meshInboxService = new MeshInboxService(
-                _meshConnectConfiguration.Object,
-                _meshConnectClient.Object
-            );
+        _meshInboxService = new MeshInboxService(
+            _meshConnectConfiguration.Object,
+            _meshConnectClient.Object
+        );
 
-            // Setup default values for configuration mock
-            _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns("https://api.mesh.com");
-            _meshConnectConfiguration.SetupGet(c => c.MeshApiInboxUriPath).Returns("inbox");
-            _meshConnectConfiguration.SetupGet(c => c.MeshApiAcknowledgeUriPath).Returns("acknowledge");
+        // Setup default values for configuration mock
+        _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns("https://api.mesh.com");
+        _meshConnectConfiguration.SetupGet(c => c.MeshApiInboxUriPath).Returns("inbox");
+        _meshConnectConfiguration.SetupGet(c => c.MeshApiAcknowledgeUriPath).Returns("acknowledge");
 
     }
     // [TestMethod]
@@ -56,16 +56,16 @@ public class MeshInboxServiceTests
         //act
         try
         {
-          await _meshInboxService.GetMessagesAsync(null);
+            await _meshInboxService.GetMessagesAsync(null);
         }
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             //assert
-            Assert.AreEqual("mailboxId",ex!.ParamName);
+            Assert.AreEqual("mailboxId", ex!.ParamName);
             testException = ex;
 
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail($"Incorrect Exception was thrown, Exception Thrown: {ex.Message}");
         }
@@ -84,12 +84,12 @@ public class MeshInboxServiceTests
             await _meshInboxService.GetMessagesAsync("valid-mailbox-id");
         }
         //assert
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
-            Assert.AreEqual("MeshApiBaseUrl",ex!.ParamName);
+            Assert.AreEqual("MeshApiBaseUrl", ex!.ParamName);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail($"Incorrect Exception was thrown, Exception Thrown: {ex.Message}");
         }
@@ -108,12 +108,12 @@ public class MeshInboxServiceTests
             await _meshInboxService.GetMessagesAsync("valid-mailbox-id");
         }
         //assert
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
-            Assert.AreEqual("MeshApiInboxUriPath",ex!.ParamName);
+            Assert.AreEqual("MeshApiInboxUriPath", ex!.ParamName);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail($"Incorrect Exception was thrown, Exception Thrown: {ex.Message}");
         }
@@ -129,10 +129,10 @@ public class MeshInboxServiceTests
 
         var checkInboxResponse = new CheckInboxResponse
         {
-            Messages = new List<string>{"MessageId"}
+            Messages = new List<string> { "MessageId" }
         };
 
-        var response = UnitTestHelpers.CreateMockHttpResponseMessage<CheckInboxResponse>(checkInboxResponse,HttpStatusCode.OK);
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<CheckInboxResponse>(checkInboxResponse, HttpStatusCode.OK);
 
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
 
@@ -156,12 +156,12 @@ public class MeshInboxServiceTests
             await _meshInboxService.GetMessageByIdAsync(null, "valid-message-id");
         }
         //assert
-        catch(ArgumentNullException exception)
+        catch (ArgumentNullException exception)
         {
             testException = exception;
-            Assert.AreEqual("mailboxId",exception.ParamName);
+            Assert.AreEqual("mailboxId", exception.ParamName);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail($"Incorrect Exception was thrown, Exception Thrown: {ex.Message}");
         }
@@ -181,12 +181,12 @@ public class MeshInboxServiceTests
         {
             await _meshInboxService.GetMessageByIdAsync(mailboxId, null);
         }
-        catch(ArgumentNullException exception)
+        catch (ArgumentNullException exception)
         {
             testException = exception;
-            Assert.AreEqual("messageId",exception.ParamName);
+            Assert.AreEqual("messageId", exception.ParamName);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail($"Incorrect Exception was thrown, Exception Thrown: {ex.Message}");
         }
@@ -199,25 +199,23 @@ public class MeshInboxServiceTests
         var mailboxId = "valid-mailbox-id";
         var messageId = "valid-message-id";
 
-        //var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "Success");
-
         var getMessageReponse = new GetMessageResponse
         {
-            fileAttachment = new FileAttachment(),
-            messageMetaData = new MessageMetaData
+            FileAttachment = new FileAttachment(),
+            MessageMetaData = new MessageMetaData
             {
                 ToMailbox = mailboxId,
                 MessageId = messageId,
             }
         };
 
-        var headers = new Dictionary<string,string>(){
+        var headers = new Dictionary<string, string>(){
             {"mex-messagetype","DATA"},
             {"mex-to",mailboxId},
             {"mex-messageid",messageId}
         };
 
-        var response = UnitTestHelpers.CreateMockHttpResponseMessage<GetMessageResponse>(getMessageReponse,HttpStatusCode.OK,headers);
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<GetMessageResponse>(getMessageReponse, HttpStatusCode.OK, headers);
 
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
 
@@ -226,7 +224,7 @@ public class MeshInboxServiceTests
 
         //assert
         Assert.IsTrue(result.IsSuccessful);
-        Assert.AreEqual(messageId,result.Response.messageMetaData.MessageId);
+        Assert.AreEqual(messageId, result.Response.MessageMetaData.MessageId);
 
     }
 
@@ -239,20 +237,20 @@ public class MeshInboxServiceTests
 
         HeadMessageResponse headMessageResponse = new HeadMessageResponse
         {
-            messageMetaData = new MessageMetaData
+            MessageMetaData = new MessageMetaData
             {
                 ToMailbox = mailboxId,
                 MessageId = messageId
             }
         };
 
-        var headers = new Dictionary<string,string>(){
+        var headers = new Dictionary<string, string>(){
             {"mex-messagetype","DATA"},
             {"mex-to",mailboxId},
             {"mex-messageid",messageId}
         };
 
-        var response = UnitTestHelpers.CreateMockHttpResponseMessage<HeadMessageResponse>(headMessageResponse,HttpStatusCode.OK,headers);
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<HeadMessageResponse>(headMessageResponse, HttpStatusCode.OK, headers);
 
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.Is<HttpRequestMessage>(msg => msg.Method == HttpMethod.Head)))
             .ReturnsAsync(response);
@@ -262,7 +260,7 @@ public class MeshInboxServiceTests
 
         //assert
         Assert.IsTrue(result.IsSuccessful);
-        Assert.AreEqual(messageId,result.Response.messageMetaData.MessageId);
+        Assert.AreEqual(messageId, result.Response.MessageMetaData.MessageId);
     }
 
 
@@ -278,7 +276,7 @@ public class MeshInboxServiceTests
             MessageId = messageId
         };
 
-        var response = UnitTestHelpers.CreateMockHttpResponseMessage<AcknowledgeMessageResponse>(acknowledgeMessageResponse,HttpStatusCode.OK);
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<AcknowledgeMessageResponse>(acknowledgeMessageResponse, HttpStatusCode.OK);
 
         _meshConnectClient.Setup(c => c.SendRequestAsync(It.Is<HttpRequestMessage>(msg => msg.Method == HttpMethod.Put)))
             .ReturnsAsync(response);
@@ -288,6 +286,6 @@ public class MeshInboxServiceTests
 
         //assert
         Assert.IsTrue(result.IsSuccessful);
-        Assert.AreEqual(messageId,result.Response.MessageId);
+        Assert.AreEqual(messageId, result.Response.MessageId);
     }
 }

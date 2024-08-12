@@ -1,21 +1,20 @@
-using System.Text.Json.Serialization;
-
 namespace NHS.MESH.Client.Models;
+using System.Text.Json.Serialization;
 
 public class TrackOutboxResponse
 {
     [JsonPropertyName("message_id")]
-    public string MessageId {get; set;}
+    public string MessageId { get; set; }
     [JsonPropertyName("local_id")]
-    public string? LocalId {get; set;}
+    public string? LocalId { get; set; }
     [JsonPropertyName("workflow_id")]
-    public string? WorkflowId {get; set;}
+    public string? WorkflowId { get; set; }
     [JsonPropertyName("filename")]
-    public string FileName {get; set;}
+    public string FileName { get; set; }
     [JsonPropertyName("expiry_time")]
-    public string ExpiryTime {get; set;}
+    public string ExpiryTime { get; set; }
     [JsonPropertyName("upload_timestamp")]
-    public string UploadTimestamp {get; set;}
+    public string UploadTimestamp { get; set; }
     [JsonPropertyName("recipient")]
     public string Recipient { get; set; }
     [JsonPropertyName("recipient_name")]
