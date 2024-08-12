@@ -14,7 +14,8 @@ public class MeshOperationServiceIntegrationTests
     {
         var services = new ServiceCollection();
 
-        services.AddMeshClient(options => {
+        services.AddMeshClient(options =>
+        {
             options.MeshApiBaseUrl = "http://localhost:8700/messageexchange";
             options.MeshApiHanshakeUriPath = "";
             options.ProxyEnabled = false;
@@ -37,7 +38,7 @@ public class MeshOperationServiceIntegrationTests
         var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
 
         //assert
-        Assert.AreEqual(mailboxId,result.Response.MailboxId);
+        Assert.AreEqual(mailboxId, result.Response.MailboxId);
     }
 
     [TestMethod]
@@ -51,7 +52,7 @@ public class MeshOperationServiceIntegrationTests
         //assert
 
         Assert.IsFalse(result.IsSuccessful);
-        Assert.AreEqual("Mailbox id does not match token",result.Error.ErrorDescription);
+        Assert.AreEqual("Mailbox id does not match token", result.Error.ErrorDescription);
 
     }
 }

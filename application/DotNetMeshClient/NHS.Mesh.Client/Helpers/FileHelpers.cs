@@ -13,14 +13,14 @@ public static class FileHelpers
 
         int? chunkNumber = null;
         var chunkRange = httpResponseMessage.Headers.GetHeaderItemValue("mex-chunk-range");
-        if(chunkRange != null)
+        if (chunkRange != null)
         {
             chunkNumber = ParseChunkRange(chunkRange).currentChunk;
         }
 
         var fileAttachment = new FileAttachment
         {
-            FileName =  httpResponseMessage.Headers.GetHeaderItemValue("mex-filename"),
+            FileName = httpResponseMessage.Headers.GetHeaderItemValue("mex-filename"),
             Content = await httpResponseMessage.Content.ReadAsByteArrayAsync(),
             ContentType = httpResponseMessage.Headers.GetHeaderItemValue("content-type"),
             ChunkNumber = chunkNumber
@@ -40,9 +40,9 @@ public static class FileHelpers
         };
     }
 
-    public static (int currentChunk,int chunkLength) ParseChunkRange(string chunkRange)
+    public static (int currentChunk, int chunkLength) ParseChunkRange(string chunkRange)
     {
-        var range =  chunkRange.Split(":");
+        var range = chunkRange.Split(":");
         int currentChunk = int.Parse(range[0]);
         int chunkLength = int.Parse(range[1]);
 
@@ -50,7 +50,8 @@ public static class FileHelpers
     }
     public static string CreateChunkRange(int currentChunk, int chunkLength)
     {
-        if(currentChunk > chunkLength){
+        if (currentChunk > chunkLength)
+        {
             throw new ArgumentException("Current chunk cannot be longer than the the chunk length");
         }
         return $"{currentChunk}:{chunkLength}";
@@ -58,7 +59,8 @@ public static class FileHelpers
 
     public static string GenerateChecksum(byte[] data)
     {
-        using(var md5instance  = MD5.Create()){
+        using (var md5instance = MD5.Create())
+        {
             var hash = md5instance.ComputeHash(data);
             return Convert.ToBase64String(hash);
         }

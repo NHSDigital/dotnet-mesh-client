@@ -3,8 +3,9 @@ using NHS.MESH.Client.Models;
 
 namespace NHS.MESH.Client.Models;
 
-public class AcknowledgeMessageResponse{
+public class AcknowledgeMessageResponse
+{
     [JsonPropertyName("messageId")]
-    public string MessageId {get; set;}
+    public string MessageId { get; set; }
 
 }

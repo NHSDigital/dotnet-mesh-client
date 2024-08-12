@@ -37,12 +37,12 @@ public class MeshOperationServiceTests
             await _meshOperationService.MeshHandshakeAsync(null);
         }
         //Assert
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
-            Assert.AreEqual(ex.ParamName,"mailboxId");
+            Assert.AreEqual(ex.ParamName, "mailboxId");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail($"Incorrect Exception was thrown, Exception Thrown: {ex.Message}");
         }
@@ -65,12 +65,12 @@ public class MeshOperationServiceTests
             await _meshOperationService.MeshHandshakeAsync(mailboxId);
         }
         //Assert
-        catch(ArgumentNullException ex)
+        catch (ArgumentNullException ex)
         {
             testException = ex;
-            Assert.AreEqual(ex.ParamName,"MeshApiBaseUrl");
+            Assert.AreEqual(ex.ParamName, "MeshApiBaseUrl");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail($"Incorrect Exception was thrown, Exception Thrown: {ex.Message}");
         }
@@ -82,13 +82,14 @@ public class MeshOperationServiceTests
     {
         // Arrange
         var mailboxId = "valid-mailbox-id";
-        var responseData = new HandshakeResponse{
+        var responseData = new HandshakeResponse
+        {
             MailboxId = mailboxId
         };
-        string jsonString  = JsonSerializer.Serialize(responseData);
+        string jsonString = JsonSerializer.Serialize(responseData);
 
         var meshApiBaseUrl = "https://api.mesh.com";
-        var response = UnitTestHelpers.CreateMockHttpResponseMessage<HandshakeResponse>(new HandshakeResponse{MailboxId = mailboxId},HttpStatusCode.OK);
+        var response = UnitTestHelpers.CreateMockHttpResponseMessage<HandshakeResponse>(new HandshakeResponse { MailboxId = mailboxId }, HttpStatusCode.OK);
 
         _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns(meshApiBaseUrl);
         _meshConnectConfiguration.SetupGet(c => c.MaxRetries).Returns(3);
@@ -98,7 +99,7 @@ public class MeshOperationServiceTests
         var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
 
         // Assert
-        Assert.AreEqual(mailboxId,result.Response.MailboxId);
+        Assert.AreEqual(mailboxId, result.Response.MailboxId);
     }
 
     [TestMethod]
@@ -108,9 +109,9 @@ public class MeshOperationServiceTests
         var mailboxId = "valid-mailbox-id";
         var meshApiBaseUrl = "https://api.mesh.com";
         var errorDescription = "Service unavailable";
-        var errorString = UnitTestHelpers.CreateMeshErrorResponseJsonString(null, null,errorDescription);
+        var errorString = UnitTestHelpers.CreateMeshErrorResponseJsonString(null, null, errorDescription);
 
-        var httpResponseMock = UnitTestHelpers.CreateMockHttpResponseMessage<string>(errorString,HttpStatusCode.ServiceUnavailable);
+        var httpResponseMock = UnitTestHelpers.CreateMockHttpResponseMessage<string>(errorString, HttpStatusCode.ServiceUnavailable);
 
         Exception testException = null;
 
@@ -126,7 +127,7 @@ public class MeshOperationServiceTests
 
 
         Assert.IsFalse(result.IsSuccessful);
-        Assert.AreEqual(errorDescription,result.Error.ErrorDescription);
+        Assert.AreEqual(errorDescription, result.Error.ErrorDescription);
     }
 
     [TestMethod]
@@ -147,12 +148,12 @@ public class MeshOperationServiceTests
             await _meshOperationService.MeshHandshakeAsync(mailboxId);
         }
         //Assert
-        catch(HttpRequestException ex)
+        catch (HttpRequestException ex)
         {
             testException = ex;
-            Assert.AreEqual(ex.Message,"Request failed");
+            Assert.AreEqual(ex.Message, "Request failed");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Assert.Fail($"Incorrect Exception was thrown, Exception Thrown: {ex.Message}");
         }

@@ -7,9 +7,9 @@ namespace NHS.MESH.Client.Helpers;
 
 public static class ResponseHelper
 {
-    public static async Task<MeshResponse<TSuccess>> CreateMeshResponse<TSuccess>(HttpResponseMessage httpResponseMessage, Func<HttpResponseMessage,Task<TSuccess>> mappingFunction )
+    public static async Task<MeshResponse<TSuccess>> CreateMeshResponse<TSuccess>(HttpResponseMessage httpResponseMessage, Func<HttpResponseMessage, Task<TSuccess>> mappingFunction)
     {
-        if(httpResponseMessage.StatusCode == HttpStatusCode.OK)
+        if (httpResponseMessage.StatusCode == HttpStatusCode.OK)
         {
             return new MeshResponse<TSuccess>
             {
@@ -30,14 +30,15 @@ public static class ResponseHelper
 
     public static string? GetHeaderItemValue(this HttpResponseHeaders headers, string key)
     {
-        if(headers == null)
+        if (headers == null)
         {
             return null;
         }
 
         var header = headers.FirstOrDefault(h => h.Key == key);
 
-        if(header.Key == null){
+        if (header.Key == null)
+        {
             return null;
         }
 
