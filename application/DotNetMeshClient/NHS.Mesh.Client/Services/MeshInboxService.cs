@@ -13,7 +13,6 @@ using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Helpers.AuthHelpers;
 using System.Text.Json;
-using System.ComponentModel;
 using System.Net;
 
 /// <summary>The MESH Inbox service.</summary>

@@ -2,7 +2,6 @@ namespace NHS.MESH.Client.IntegrationTests;
 using Microsoft.Extensions.DependencyInjection;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client;
-using System.Net;
 using NHS.MESH.Client.Models;
 using NHS.MESH.Client.Helpers.ContentHelpers;
 

@@ -1,7 +1,6 @@
 namespace NHS.MESH.Client.UnitTests;
 
 using System.Net;
-using Castle.Core.Logging;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NHS.MESH.Client.Contracts.Clients;

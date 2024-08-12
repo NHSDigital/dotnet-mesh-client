@@ -1,8 +1,6 @@
 namespace NHS.MESH.Client;
 using System.Net;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using NHS.MESH.Client.Clients;
 using NHS.MESH.Client.Configuration;
 using NHS.MESH.Client.Contracts.Clients;
