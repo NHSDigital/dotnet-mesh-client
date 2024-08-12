@@ -1,10 +1,9 @@
+namespace NHS.MESH.Client.Helpers;
 using System.CodeDom.Compiler;
 using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using NHS.MESH.Client.Models;
-
-namespace NHS.MESH.Client.Helpers;
 
 public static class FileHelpers
 {

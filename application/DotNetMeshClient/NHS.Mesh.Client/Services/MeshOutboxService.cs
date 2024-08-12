@@ -1,10 +1,11 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MeshOutboxService.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+namespace NHS.MESH.Client.Services;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
@@ -19,8 +20,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using NHS.MESH.Client.Helpers;
-
-namespace NHS.MESH.Client.Services;
 
 /// <summary>The MESH Outbox service.</summary>
 public class MeshOutboxService : IMeshOutboxService

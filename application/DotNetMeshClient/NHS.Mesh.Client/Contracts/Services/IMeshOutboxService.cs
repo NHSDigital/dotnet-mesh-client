@@ -5,11 +5,10 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+namespace NHS.MESH.Client.Contracts.Services;
 using Microsoft.AspNetCore.Http;
 using NHS.MESH.Client.Models;
 using System.Net;
-
-namespace NHS.MESH.Client.Contracts.Services;
 
 /// <summary>The MeshOutboxService class has functions to get the required details to make Http calls for sending messages to Mesh API.</summary>
 public interface IMeshOutboxService

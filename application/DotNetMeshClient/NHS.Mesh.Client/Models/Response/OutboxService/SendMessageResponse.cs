@@ -5,9 +5,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Text.Json.Serialization;
-
 namespace NHS.MESH.Client.Models;
+using System.Text.Json.Serialization;
 
 /// <summary>The response from Send Message MESH API.</summary>
 public class SendMessageResponse

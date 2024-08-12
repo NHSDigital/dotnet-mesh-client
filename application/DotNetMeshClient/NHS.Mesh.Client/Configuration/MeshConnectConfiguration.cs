@@ -5,9 +5,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-using NHS.MESH.Client.Contracts.Configurations;
-
 namespace NHS.MESH.Client.Configuration;
+using NHS.MESH.Client.Contracts.Configurations;
 
 /// <summary>The MESH connect Configurations.</summary>
 public class MeshConnectConfiguration : IMeshConnectConfiguration

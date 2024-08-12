@@ -1,16 +1,15 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ContentSplitHelper.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+namespace NHS.MESH.Client.Helpers.ContentHelpers;
 using Microsoft.AspNetCore.Http;
 using NHS.MESH.Client.Models;
 using System.IO.Compression;
 using System.Reflection.Metadata;
-
-namespace NHS.MESH.Client.Helpers.ContentHelpers;
 
 /// <summary>Provides helper functions for content split.</summary>
 public static class ContentSplitHelper

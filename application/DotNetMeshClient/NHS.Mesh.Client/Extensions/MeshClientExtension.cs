@@ -1,3 +1,4 @@
+namespace NHS.MESH.Client;
 using System.Net;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,9 +9,6 @@ using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Services;
-
-
-namespace NHS.MESH.Client;
 
 public static class MeshClientServiceExtension
 {

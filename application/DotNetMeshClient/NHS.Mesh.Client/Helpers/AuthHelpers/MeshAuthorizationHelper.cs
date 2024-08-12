@@ -5,9 +5,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-using NHS.MESH.Client.Helpers.ContentHelpers;
-
 namespace NHS.MESH.Client.Helpers.AuthHelpers;
+using NHS.MESH.Client.Helpers.ContentHelpers;
 
 /// <summary>Provides helper functions for Mesh Authorization.</summary>
 public static class MeshAuthorizationHelper

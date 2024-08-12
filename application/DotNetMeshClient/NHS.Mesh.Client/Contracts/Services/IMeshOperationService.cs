@@ -6,10 +6,9 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
+namespace NHS.MESH.Client.Contracts.Services;
 using System.Net;
 using NHS.MESH.Client.Models;
-
-namespace NHS.MESH.Client.Contracts.Services;
 
 /// <summary>The MESH Operations service.</summary>
 public interface IMeshOperationService

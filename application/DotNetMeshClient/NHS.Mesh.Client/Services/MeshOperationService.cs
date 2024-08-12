@@ -6,6 +6,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
+namespace NHS.MESH.Client.Services;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
@@ -14,8 +15,6 @@ using NHS.MESH.Client.Helpers.AuthHelpers;
 using NHS.MESH.Client.Models;
 using System.Net;
 using System.Text.Json;
-
-namespace NHS.MESH.Client.Services;
 
 /// <summary>The MESH Operations service.</summary>
 public class MeshOperationService : IMeshOperationService

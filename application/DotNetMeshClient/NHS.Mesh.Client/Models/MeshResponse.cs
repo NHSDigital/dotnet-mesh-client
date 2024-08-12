@@ -1,6 +1,6 @@
+namespace NHS.MESH.Client.Models;
 using NHS.MESH.Client.Models;
 
-namespace NHS.MESH.Client.Models;
 public class MeshResponse<TSuccess>
 {
     public bool IsSuccessful;

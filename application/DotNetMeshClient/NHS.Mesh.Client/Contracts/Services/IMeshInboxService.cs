@@ -5,10 +5,9 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+namespace NHS.MESH.Client.Contracts.Services;
 using System.Net;
 using NHS.MESH.Client.Models;
-
-namespace NHS.MESH.Client.Contracts.Services;
 
 /// <summary>The MeshInboxService class has functions to get the required details to make Http calls for getting messages from Mesh API.</summary>
 public interface IMeshInboxService

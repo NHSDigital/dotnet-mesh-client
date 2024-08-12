@@ -5,10 +5,9 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+namespace NHS.MESH.Client.Helpers.ContentHelpers;
 using System.Security.Cryptography;
 using System.Text;
-
-namespace NHS.MESH.Client.Helpers.ContentHelpers;
 
 /// <summary>Provides helper functions for content encoding.</summary>
 public static class ContentEncodingHelper

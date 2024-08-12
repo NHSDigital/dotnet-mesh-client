@@ -1,6 +1,5 @@
-using System.Text.Json.Serialization;
-
 namespace NHS.MESH.Client.Models;
+using System.Text.Json.Serialization;
 
 public class APIErrorResponse
 {

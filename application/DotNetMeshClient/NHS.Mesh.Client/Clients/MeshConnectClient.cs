@@ -5,14 +5,13 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+namespace NHS.MESH.Client.Clients;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Models;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-
-namespace NHS.MESH.Client.Clients;
 
 /// <summary>The MESH connect client for MESH API calls.</summary>
 public class MeshConnectClient : IMeshConnectClient

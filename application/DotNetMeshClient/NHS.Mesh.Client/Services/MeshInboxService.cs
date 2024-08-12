@@ -1,10 +1,11 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MyClass.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+namespace NHS.MESH.Client.Services;
 using NHS.MESH.Client.Helpers;
 using NHS.MESH.Client.Models;
 using NHS.MESH.Client.Contracts.Clients;
@@ -14,8 +15,6 @@ using NHS.MESH.Client.Helpers.AuthHelpers;
 using System.Text.Json;
 using System.ComponentModel;
 using System.Net;
-
-namespace NHS.MESH.Client.Services;
 
 /// <summary>The MESH Inbox service.</summary>
 public class MeshInboxService : IMeshInboxService
