@@ -2,6 +2,6 @@ namespace NHS.MESH.Client.Models;
 
 public class HeadMessageResponse
 {
-    public MessageMetaData messageMetaData { get; set; }
+    public MessageMetaData MessageMetaData { get; set; }
 
 }

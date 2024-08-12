@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MyClass.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
@@ -98,8 +98,8 @@ public class MeshInboxService : IMeshInboxService
         {
             return new GetMessageResponse
             {
-                fileAttachment = await FileHelpers.CreateFileAttachment(_),
-                messageMetaData = FileHelpers.CreateMessageMetaData(_)
+                FileAttachment = await FileHelpers.CreateFileAttachment(_),
+                MessageMetaData = FileHelpers.CreateMessageMetaData(_)
 
             };
         });
@@ -156,8 +156,8 @@ public class MeshInboxService : IMeshInboxService
             IsSuccessful = true,
             Response = new GetChunkedMessageResponse
             {
-                fileAttachments = chunks,
-                messageMetaData = FileHelpers.CreateMessageMetaData(initialMessage)
+                FileAttachments = chunks,
+                MessageMetaData = FileHelpers.CreateMessageMetaData(initialMessage)
             }
 
         };
@@ -206,7 +206,7 @@ public class MeshInboxService : IMeshInboxService
             await Task.CompletedTask;
             return new HeadMessageResponse
             {
-                messageMetaData = new MessageMetaData
+                MessageMetaData = new MessageMetaData
                 {
                     WorkflowID = _.Headers.GetHeaderItemValue("mex-workflowid"),
                     ToMailbox = _.Headers.GetHeaderItemValue("mex-to"),

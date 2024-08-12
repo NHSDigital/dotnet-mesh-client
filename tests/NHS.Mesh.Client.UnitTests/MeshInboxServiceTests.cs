@@ -199,12 +199,10 @@ public class MeshInboxServiceTests
         var mailboxId = "valid-mailbox-id";
         var messageId = "valid-message-id";
 
-        //var response = new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.OK, "Success");
-
         var getMessageReponse = new GetMessageResponse
         {
-            fileAttachment = new FileAttachment(),
-            messageMetaData = new MessageMetaData
+            FileAttachment = new FileAttachment(),
+            MessageMetaData = new MessageMetaData
             {
                 ToMailbox = mailboxId,
                 MessageId = messageId,
@@ -226,7 +224,7 @@ public class MeshInboxServiceTests
 
         //assert
         Assert.IsTrue(result.IsSuccessful);
-        Assert.AreEqual(messageId, result.Response.messageMetaData.MessageId);
+        Assert.AreEqual(messageId, result.Response.MessageMetaData.MessageId);
 
     }
 
@@ -239,7 +237,7 @@ public class MeshInboxServiceTests
 
         HeadMessageResponse headMessageResponse = new HeadMessageResponse
         {
-            messageMetaData = new MessageMetaData
+            MessageMetaData = new MessageMetaData
             {
                 ToMailbox = mailboxId,
                 MessageId = messageId
@@ -262,7 +260,7 @@ public class MeshInboxServiceTests
 
         //assert
         Assert.IsTrue(result.IsSuccessful);
-        Assert.AreEqual(messageId, result.Response.messageMetaData.MessageId);
+        Assert.AreEqual(messageId, result.Response.MessageMetaData.MessageId);
     }
 
 

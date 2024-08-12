@@ -58,8 +58,7 @@ public class MeshOperationServiceTests
         var mailboxId = "valid-mailbox-id";
         _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns((string)null);
 
-        // Act & Assert
-
+        // Act
         try
         {
             await _meshOperationService.MeshHandshakeAsync(mailboxId);
@@ -125,7 +124,7 @@ public class MeshOperationServiceTests
 
         var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
 
-
+        // Assert
         Assert.IsFalse(result.IsSuccessful);
         Assert.AreEqual(errorDescription, result.Error.ErrorDescription);
     }

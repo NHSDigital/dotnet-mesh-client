@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MeshOutboxService.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
@@ -63,10 +63,6 @@ public class MeshOutboxService : IMeshOutboxService
         if (file.Content == null || file.Content.Length == 0) { throw new ArgumentNullException(nameof(file.Content)); }
 
         var uri = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}");
-
-
-        // Headers
-
 
         // Body
         var content = await FileHelpers.CompressFileAsync(file.Content);
