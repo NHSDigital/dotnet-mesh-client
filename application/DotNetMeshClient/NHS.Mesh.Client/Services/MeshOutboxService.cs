@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MeshOutboxService.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
@@ -38,7 +38,6 @@ public class MeshOutboxService : IMeshOutboxService
     /// </summary>
     /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
     /// <param name="meshConnectClient">The MESH Connect Client.</param>
-    /// <param name="meshOperationService">The MESH Operation service.</param>
     public MeshOutboxService(IMeshConnectConfiguration meshConnectConfiguration, IMeshConnectClient meshConnectClient, ILogger<MeshOutboxService> logger)
     {
         _meshConnectConfiguration = meshConnectConfiguration;

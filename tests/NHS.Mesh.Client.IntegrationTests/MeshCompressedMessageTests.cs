@@ -4,10 +4,11 @@ using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client;
 using System.Net;
 using NHS.MESH.Client.Models;
+using NHS.MESH.Client.Helpers.ContentHelpers;
 
 [TestClass]
 [TestCategory("Integration")]
-public class MeshUncompressedMessageTests
+public class MeshCompressedMessageTests
 {
 
     private readonly IMeshOutboxService _meshOutboxService;
@@ -21,7 +22,7 @@ public class MeshUncompressedMessageTests
     private const string fromMailbox = "X26ABC2";
     private const string workflowId = "TEST-WORKFLOW";
 
-    public MeshUncompressedMessageTests()
+    public MeshCompressedMessageTests()
     {
         var services = new ServiceCollection();
 
@@ -32,7 +33,6 @@ public class MeshUncompressedMessageTests
         });
 
         var serviceProvider = services.BuildServiceProvider();
-
         _meshInboxService = serviceProvider.GetService<IMeshInboxService>();
         _meshOutboxService = serviceProvider.GetService<IMeshOutboxService>();
     }
@@ -47,10 +47,10 @@ public class MeshUncompressedMessageTests
 
         FileAttachment fileAttachment = IntegrationTestHelpers.CreateFileAttachment(fileName, messageContent, contentType);
 
-        //Act - Send Uncompressed Message
-        var sendMessageResult = await _meshOutboxService.SendUnCompressedMessageAsync(fromMailbox, toMailbox, workflowId, fileAttachment);
+        //Act - Send Compressed Message
+        var sendMessageResult = await _meshOutboxService.SendCompressedMessageAsync(fromMailbox, toMailbox, workflowId, fileAttachment);
 
-        //Assert - UnCompressedMessage Sent Successfully
+        //Assert - Compressed Sent Successfully
         Assert.IsTrue(sendMessageResult.IsSuccessful);
         Assert.IsNotNull(sendMessageResult.Response);
 
@@ -80,9 +80,10 @@ public class MeshUncompressedMessageTests
 
         //Assert - check downloded message is correct
         Assert.IsTrue(getMessageResponse.IsSuccessful);
-        CollectionAssert.AreEqual(fileAttachment.Content, getMessageResponse.Response.FileAttachment.Content);
+        var fileContentDecompressed = GZIPHelpers.DeCompressBuffer(getMessageResponse.Response.FileAttachment.Content);
+        CollectionAssert.AreEqual(fileAttachment.Content, fileContentDecompressed);
 
-        string messageResponseText = System.Text.Encoding.Default.GetString(getMessageResponse.Response.FileAttachment.Content);
+        string messageResponseText = System.Text.Encoding.Default.GetString(fileContentDecompressed);
         Assert.AreEqual(messageContent, messageResponseText);
 
         //Act - Acknowledge Message
@@ -92,16 +93,5 @@ public class MeshUncompressedMessageTests
         Assert.IsTrue(acknowledgeMessageResponse.IsSuccessful);
         Assert.AreEqual(messageId, acknowledgeMessageResponse.Response.MessageId);
 
-
-
-
-
-
-
-
-
-
     }
-
-
 }

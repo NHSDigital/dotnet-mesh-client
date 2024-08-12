@@ -3,6 +3,7 @@ using System.CodeDom.Compiler;
 using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using NHS.MESH.Client.Helpers.ContentHelpers;
 using NHS.MESH.Client.Models;
 
 public static class FileHelpers
@@ -72,55 +73,10 @@ public static class FileHelpers
 
     public static async Task<HttpContent> CompressFileAsync(byte[] data)
     {
-        using (var memoryStream = new MemoryStream())
-        {
-            using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
-            {
-                using (var fileStream = new MemoryStream(data))
-                {
-                    await fileStream.CopyToAsync(gzipStream);
-                }
-            }
+        var compressedData = GZIPHelpers.CompressBuffer(data);
 
-            memoryStream.Position = 0;
+        var content = new ByteArrayContent(compressedData);
 
-            var content = new StreamContent(memoryStream)
-            {
-                Headers =
-                {
-                    ContentType = new MediaTypeHeaderValue("application/octet-stream"),
-                    ContentEncoding = { "gzip" }
-                }
-            };
-
-            return content;
-        }
-
+        return content;
     }
-
-    public static async Task<HttpContent> CompressFileAsync(Stream stream)
-    {
-        using (var memoryStream = new MemoryStream())
-        {
-            using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
-            {
-                await stream.CopyToAsync(gzipStream);
-            }
-
-            memoryStream.Position = 0;
-
-            var content = new StreamContent(memoryStream)
-            {
-                Headers =
-                {
-                    ContentType = new MediaTypeHeaderValue("application/octet-stream"),
-                    ContentEncoding = { "gzip" }
-                }
-            };
-            return content;
-        }
-
-    }
-
-
 }

@@ -23,6 +23,8 @@ public class MeshOutboxServiceTests
         _meshConnectConfiguration = new Mock<IMeshConnectConfiguration>(MockBehavior.Strict);
         _meshConnectClient = new Mock<IMeshConnectClient>(MockBehavior.Strict);
 
+        _logger = new Mock<ILogger<MeshOutboxService>>(MockBehavior.Loose);
+
         _meshOutboxService = new MeshOutboxService(
             _meshConnectConfiguration.Object,
             _meshConnectClient.Object,

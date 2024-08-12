@@ -5,6 +5,7 @@ using NHS.MESH.Client;
 using System.Net;
 
 [TestClass]
+[TestCategory("Integration")]
 public class MeshOperationServiceIntegrationTests
 {
 

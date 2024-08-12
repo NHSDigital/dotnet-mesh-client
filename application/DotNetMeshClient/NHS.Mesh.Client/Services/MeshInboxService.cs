@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MyClass.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
@@ -205,7 +205,7 @@ public class MeshInboxService : IMeshInboxService
             await Task.CompletedTask;
             return new HeadMessageResponse
             {
-                messageMetaData = new MessageMetaData
+                MessageMetaData = new MessageMetaData
                 {
                     WorkflowID = _.Headers.GetHeaderItemValue("mex-workflowid"),
                     ToMailbox = _.Headers.GetHeaderItemValue("mex-to"),
