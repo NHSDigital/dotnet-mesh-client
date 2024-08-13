@@ -3,6 +3,7 @@ namespace NHS.MESH.Client.UnitTests;
 using System.Net;
 using Microsoft.Extensions.Logging;
 using Moq;
+using NHS.Mesh.Client.TestingCommon;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
@@ -148,7 +149,7 @@ public class MeshOutboxServiceTests
         var fileAttachment = new FileAttachment
         {
             FileName = "FileName",
-            Content = UnitTestHelpers.CreateFakeFileContent(2 * 1024 * 1024),
+            Content = TestingHelpers.CreateFakeFileContent(2 * 1024 * 1024),
             ContentType = "application/octet-stream"
 
         };
@@ -278,7 +279,7 @@ public class MeshOutboxServiceTests
         var fileAttachment = new FileAttachment
         {
             FileName = "FileName",
-            Content = UnitTestHelpers.CreateFakeFileContent(2 * 1024 * 1024),
+            Content = TestingHelpers.CreateFakeFileContent(2 * 1024 * 1024),
             ContentType = "application/octet-stream"
 
         };
@@ -411,7 +412,7 @@ public class MeshOutboxServiceTests
         FileAttachment fileAttachment = new FileAttachment
         {
             FileName = "FileName",
-            Content = UnitTestHelpers.CreateFakeFileContent(9 * 1024 * 1024),
+            Content = TestingHelpers.CreateFakeFileContent(9 * 1024 * 1024),
             ContentType = "application/octet-stream"
         };
 

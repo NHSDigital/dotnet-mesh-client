@@ -136,11 +136,7 @@ public class MeshInboxService : IMeshInboxService
         for (int i = 2; i <= chunkRangeInts.chunkLength; i++)
         {
             var meshResponse = await GetMessageChunkAsync(mailboxId, messageId, i);
-            if (meshResponse.StatusCode == HttpStatusCode.OK)
-            {
-                throw new InvalidOperationException($"MessageId: {messageId} in MailBox: {mailboxId} is not a chunked message, Use the GetMessageByIdAsync method to get this message");
-            }
-            if (meshResponse.StatusCode != HttpStatusCode.PartialContent)
+            if (meshResponse.StatusCode != HttpStatusCode.PartialContent && meshResponse.StatusCode != HttpStatusCode.OK)
             {
                 return await ResponseHelper.CreateMeshResponse<GetChunkedMessageResponse>(initialMessage, _ => null);
             }

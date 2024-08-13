@@ -76,4 +76,33 @@ public static class FileHelpers
 
         return content;
     }
+
+    public static async Task<FileAttachment> ReassembleChunkedFile(List<FileAttachment> fileChunks)
+    {
+
+        var orderedChunks = fileChunks.OrderBy(i => i.ChunkNumber);
+        var firstChunk = orderedChunks.First();
+
+        using(var memoryStream = new MemoryStream()){
+            int i = 1;
+            foreach(var file in orderedChunks)
+            {
+                if(file.ChunkNumber != i)
+                {
+                    throw new ArgumentException("List was missing Chunks Cannot reassemble");
+                }
+                var decompressedData = GZIPHelpers.DeCompressBuffer(file.Content);
+                await memoryStream.WriteAsync(decompressedData);
+                i++;
+            }
+            return new FileAttachment
+            {
+                FileName = firstChunk.FileName,
+                ContentType = firstChunk.ContentType,
+                Content = memoryStream.ToArray()
+            };
+        }
+
+
+    }
 }

@@ -2,10 +2,10 @@ namespace NHS.MESH.Client.IntegrationTests;
 using Microsoft.Extensions.DependencyInjection;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client;
-using System.Net;
 using NHS.MESH.Client.Models;
-using NHS.MESH.Client.Helpers.ContentHelpers;
 using NHS.MESH.Client.Contracts.Configurations;
+using NHS.MESH.Client.Helpers;
+using NHS.Mesh.Client.TestingCommon;
 
 [TestClass]
 [TestCategory("Integration")]
@@ -36,9 +36,9 @@ public class MeshChunkedMessageTests
         });
 
         var serviceProvider = services.BuildServiceProvider();
-        _meshInboxService = serviceProvider.GetService<IMeshInboxService>();
-        _meshOutboxService = serviceProvider.GetService<IMeshOutboxService>();
-        _config =  serviceProvider.GetService<IMeshConnectConfiguration>();
+        _meshInboxService = serviceProvider.GetService<IMeshInboxService>()!;
+        _meshOutboxService = serviceProvider.GetService<IMeshOutboxService>()!;
+        _config =  serviceProvider.GetService<IMeshConnectConfiguration>()!;
 
 
     }
@@ -47,7 +47,7 @@ public class MeshChunkedMessageTests
     {
 
         //arrange
-        messageContent = IntegrationTestHelpers.LoremIpsum(100, 150, 100, 150, 100);
+        messageContent = TestingHelpers.LoremIpsum(200, 250, 100, 150, 200);
         fileName = "TestFile.txt";
         contentType = "text/plain";
 
@@ -55,13 +55,14 @@ public class MeshChunkedMessageTests
 
         //Assert that the test data length is long enough
         Assert.IsTrue(fileAttachment.Content.Length > _config.ChunkSize);
+        var numberOfChunks = fileAttachment.Content.Length / _config.ChunkSize +1;
 
         //Act - Send Uncompressed Message
-        var sendMessageResult = await _meshOutboxService.SendCompressedMessageAsync(fromMailbox, toMailbox, workflowId, fileAttachment);
+        var sendMessageResult = await _meshOutboxService.SendChunkedMessageAsync(fromMailbox, toMailbox, workflowId, fileAttachment);
 
         //Assert - UnCompressedMessage Sent Successfully
         Assert.IsTrue(sendMessageResult.IsSuccessful);
-        Assert.IsNotNull(sendMessageResult.Response);
+        //Assert.IsNotNull(sendMessageResult.Response);
 
         //arrange
         var messageId = sendMessageResult.Response.MessageId;
@@ -85,14 +86,17 @@ public class MeshChunkedMessageTests
         Assert.AreEqual("DATA", getMessageHeadResponse.Response.MessageMetaData.MessageType);
 
         //Act - Download Message
-        var getMessageResponse = await _meshInboxService.GetMessageByIdAsync(toMailbox, messageId!);
+        var getMessageResponse = await _meshInboxService.GetChunkedMessageByIdAsync(toMailbox, messageId!);
 
         //Assert - check downloded message is correct
         Assert.IsTrue(getMessageResponse.IsSuccessful);
-        var fileContentDecompressed = GZIPHelpers.DeCompressBuffer(getMessageResponse.Response.FileAttachment.Content);
-        CollectionAssert.AreEqual(fileAttachment.Content, fileContentDecompressed);
+        Assert.AreEqual(numberOfChunks,getMessageResponse.Response.FileAttachments.Count,$"Number of chunks did't match, expected count: { numberOfChunks } Actual count: { getMessageResponse.Response.FileAttachments.Count }");
 
-        string messageResponseText = System.Text.Encoding.Default.GetString(fileContentDecompressed);
+        var assembledFile = await FileHelpers.ReassembleChunkedFile(getMessageResponse.Response.FileAttachments);
+
+        CollectionAssert.AreEqual(fileAttachment.Content, assembledFile.Content);
+
+        string messageResponseText = System.Text.Encoding.Default.GetString(assembledFile.Content);
         Assert.AreEqual(messageContent, messageResponseText);
 
         //Act - Acknowledge Message

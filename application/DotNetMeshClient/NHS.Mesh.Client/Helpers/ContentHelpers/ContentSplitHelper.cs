@@ -16,7 +16,7 @@ public static class ContentSplitHelper
     /// <param name="inputFilePath">The input Path.</param>
     /// <param name="chunkSize">The file size.</param>
     /// <returns></returns>
-    public static async Task<List<byte[]>> SplitFileToMemoryStreams(byte[] fileData, int chunkSize = 19 * 1024 * 1024)
+    public static async Task<List<byte[]>> SplitFileToByteArrays(byte[] fileData, int chunkSize = 19 * 1024 * 1024)
     {
         List<byte[]> chunks = new List<byte[]>();
 
@@ -26,7 +26,8 @@ public static class ContentSplitHelper
         long bytesLeft = memoryStream.Length;
         while (bytesLeft > 0)
         {
-            byte[] buffer = new byte[chunkSize];
+
+            byte[] buffer = new byte[(int)Math.Min(bytesLeft, chunkSize)];
 
 
             int bytesRead = await memoryStream.ReadAsync(buffer, 0, (int)Math.Min(bytesLeft, chunkSize));

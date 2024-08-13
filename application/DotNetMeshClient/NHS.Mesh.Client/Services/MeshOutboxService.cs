@@ -127,28 +127,29 @@ public class MeshOutboxService : IMeshOutboxService
         if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiOutboxUriPath)); }
         ArgumentNullException.ThrowIfNull(file);
 
-        var chunkedFiles = await ContentSplitHelper.SplitFileToMemoryStreams(file.Content, _meshConnectConfiguration.ChunkSize);
+        var chunkedFiles = await ContentSplitHelper.SplitFileToByteArrays(file.Content, _meshConnectConfiguration.ChunkSize);
 
 
         Uri initalMessageURI = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}");
         var initialChunk = await FileHelpers.CompressFileAsync(chunkedFiles[0]);
         var httpResponseMessage = await SendMessageChunk(initalMessageURI, fromMailboxId, toMailboxId, workflowId, initialChunk, file.FileName, 1, chunkedFiles.Count, localId, subject, includeChecksum);
 
-        var meshResponse = await ResponseHelper.CreateMeshResponse<SendMessageResponse>(httpResponseMessage, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
+        var initialMeshResponse = await ResponseHelper.CreateMeshResponse<SendMessageResponse>(httpResponseMessage, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
 
-        if (!meshResponse.IsSuccessful)
+        if (!initialMeshResponse.IsSuccessful)
         {
-            return meshResponse;
+            return initialMeshResponse;
         }
 
-        var messageId = meshResponse.Response.MessageId;
+        var messageId = initialMeshResponse.Response.MessageId;
 
         for (var i = 1; i < chunkedFiles.Count; i++)
         {
             Uri chunkMessageURI = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}/{messageId}/{i + 1}");
             var chunk = await FileHelpers.CompressFileAsync(chunkedFiles[i]);
             var chunkMeshResponse = await SendMessageChunk(chunkMessageURI, fromMailboxId, toMailboxId, workflowId, chunk, file.FileName, i + 1, chunkedFiles.Count, localId, subject, includeChecksum);
-            meshResponse = await ResponseHelper.CreateMeshResponse<SendMessageResponse>(chunkMeshResponse, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
+            var responseString = await chunkMeshResponse.Content.ReadAsStringAsync(); //TODO REMOVE
+            var meshResponse = await ResponseHelper.CreateMeshResponse<SendMessageResponse>(chunkMeshResponse, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
 
             if (!meshResponse.IsSuccessful)
             {
@@ -157,7 +158,7 @@ public class MeshOutboxService : IMeshOutboxService
 
         }
 
-        return meshResponse;
+        return initialMeshResponse;
 
     }
     /// <summary>

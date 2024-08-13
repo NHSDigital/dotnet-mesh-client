@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client;
 using NHS.MESH.Client.Models;
+using NHS.Mesh.Client.TestingCommon;
 
 [TestClass]
 [TestCategory("Integration")]
@@ -40,7 +41,7 @@ public class MeshUncompressedMessageTests
     {
 
         //arrange
-        messageContent = IntegrationTestHelpers.LoremIpsum(100, 150, 100, 150, 100);
+        messageContent = TestingHelpers.LoremIpsum(100, 150, 100, 150, 100);
         fileName = "TestFile.txt";
         contentType = "text/plain";
 

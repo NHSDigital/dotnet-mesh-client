@@ -22,6 +22,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\application\DotNetMeshClient\NHS.Mesh.Client\NHS.Mesh.Client.csproj" />
+        <ProjectReference Include="..\NHS.Mesh.Client.TestingCommon\NHS.Mesh.Client.TestingCommon.csproj" />
     </ItemGroup>
 
 </Project>
