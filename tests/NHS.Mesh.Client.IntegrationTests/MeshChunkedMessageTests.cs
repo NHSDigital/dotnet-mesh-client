@@ -32,7 +32,6 @@ public class MeshChunkedMessageTests
         services.AddMeshClient(options =>
         {
             options.MeshApiBaseUrl = "http://localhost:8700/messageexchange";
-            options.MeshApiHanshakeUriPath = "";
         });
 
         var serviceProvider = services.BuildServiceProvider();
@@ -84,6 +83,7 @@ public class MeshChunkedMessageTests
         Assert.AreEqual(messageId, getMessageHeadResponse.Response.MessageMetaData.MessageId);
         Assert.AreEqual(fileName, getMessageHeadResponse.Response.MessageMetaData.FileName);
         Assert.AreEqual("DATA", getMessageHeadResponse.Response.MessageMetaData.MessageType);
+        Assert.AreEqual(numberOfChunks,getMessageHeadResponse.Response.MessageMetaData.TotalChunks);
 
         //Act - Download Message
         var getMessageResponse = await _meshInboxService.GetChunkedMessageByIdAsync(toMailbox, messageId!);
