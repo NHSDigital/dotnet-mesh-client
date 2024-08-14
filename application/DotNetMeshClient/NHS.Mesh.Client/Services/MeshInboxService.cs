@@ -198,8 +198,11 @@ public class MeshInboxService : IMeshInboxService
         return await ResponseHelper.CreateMeshResponse<HeadMessageResponse>(meshResponse, async _ =>
         {
             await Task.CompletedTask;
+            int? totalChunks = int.TryParse(_.Headers.GetHeaderItemValue("mex-total-chunks"), out int count)  ? count : null;
             return new HeadMessageResponse
             {
+
+
                 MessageMetaData = new MessageMetaData
                 {
                     WorkflowID = _.Headers.GetHeaderItemValue("mex-workflowid"),
@@ -207,7 +210,9 @@ public class MeshInboxService : IMeshInboxService
                     FromMailbox = _.Headers.GetHeaderItemValue("mex-from"),
                     MessageId = _.Headers.GetHeaderItemValue("mex-messageid"),
                     FileName = _.Headers.GetHeaderItemValue("mex-filename"),
-                    MessageType = _.Headers.GetHeaderItemValue("mex-messagetype")
+                    MessageType = _.Headers.GetHeaderItemValue("mex-messagetype"),
+                    ChunkRange = _.Headers.GetHeaderItemValue("mex-chunk-range"),
+                    TotalChunks = totalChunks
                 }
             };
         });

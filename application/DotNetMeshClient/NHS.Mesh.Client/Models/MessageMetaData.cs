@@ -1,5 +1,4 @@
 namespace NHS.MESH.Client.Models;
-using System.ComponentModel.DataAnnotations;
 
 public class MessageMetaData
 {
@@ -9,4 +8,6 @@ public class MessageMetaData
     public string MessageId { get; set; }
     public string? FileName { get; set; }
     public string? MessageType { get; set; }
+    public string? ChunkRange  {get; set;}
+    public int? TotalChunks { get; set;}
 }
