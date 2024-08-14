@@ -8,7 +8,7 @@ public static class ResponseHelper
 {
     public static async Task<MeshResponse<TSuccess>> CreateMeshResponse<TSuccess>(HttpResponseMessage httpResponseMessage, Func<HttpResponseMessage, Task<TSuccess>> mappingFunction)
     {
-        if (httpResponseMessage.StatusCode == HttpStatusCode.OK)
+        if (httpResponseMessage.StatusCode == HttpStatusCode.OK || httpResponseMessage.StatusCode == HttpStatusCode.Accepted || httpResponseMessage.StatusCode == HttpStatusCode.PartialContent)
         {
             return new MeshResponse<TSuccess>
             {

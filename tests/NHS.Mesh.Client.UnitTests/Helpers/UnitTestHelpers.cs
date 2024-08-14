@@ -1,8 +1,5 @@
-using System.Data.SqlTypes;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using Moq;
 using NHS.MESH.Client.Models;
 
 public static class UnitTestHelpers
@@ -45,13 +42,4 @@ public static class UnitTestHelpers
 
     }
 
-    public static byte[] CreateFakeFileContent(int length)
-    {
-        byte[] bytes = new byte[length];
-        for (int i = 0; i < length; i++)
-        {
-            bytes[i] = 0x20;
-        }
-        return bytes;
-    }
 }

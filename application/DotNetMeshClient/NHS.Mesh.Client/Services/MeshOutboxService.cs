@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MeshOutboxService.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
@@ -12,14 +12,11 @@ using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Helpers.AuthHelpers;
 using NHS.MESH.Client.Helpers.ContentHelpers;
 using NHS.MESH.Client.Models;
-using Microsoft.AspNetCore.Http;
 using System.IO;
-using System.IO.Compression;
-using System.Net;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using NHS.MESH.Client.Helpers;
+using Microsoft.Extensions.Logging;
 
 /// <summary>The MESH Outbox service.</summary>
 public class MeshOutboxService : IMeshOutboxService
@@ -30,17 +27,18 @@ public class MeshOutboxService : IMeshOutboxService
     /// <summary>The MESH Connect Client.</summary>
     private readonly IMeshConnectClient _meshConnectClient;
 
+    private readonly ILogger<MeshOutboxService> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MeshOutboxService"/> class.
     /// </summary>
     /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
     /// <param name="meshConnectClient">The MESH Connect Client.</param>
-    /// <param name="meshOperationService">The MESH Operation service.</param>
-    public MeshOutboxService(IMeshConnectConfiguration meshConnectConfiguration, IMeshConnectClient meshConnectClient)
+    public MeshOutboxService(IMeshConnectConfiguration meshConnectConfiguration, IMeshConnectClient meshConnectClient, ILogger<MeshOutboxService> logger)
     {
         _meshConnectConfiguration = meshConnectConfiguration;
         _meshConnectClient = meshConnectClient;
+        _logger = logger;
     }
 
     /// <summary>
@@ -129,28 +127,29 @@ public class MeshOutboxService : IMeshOutboxService
         if (string.IsNullOrWhiteSpace(_meshConnectConfiguration.MeshApiOutboxUriPath)) { throw new ArgumentNullException(nameof(_meshConnectConfiguration.MeshApiOutboxUriPath)); }
         ArgumentNullException.ThrowIfNull(file);
 
-        var chunkedFiles = await ContentSplitHelper.SplitFileToMemoryStreams(file.Content, _meshConnectConfiguration.ChunkSize);
+        var chunkedFiles = await ContentSplitHelper.SplitFileToByteArrays(file.Content, _meshConnectConfiguration.ChunkSize);
 
 
         Uri initalMessageURI = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}");
         var initialChunk = await FileHelpers.CompressFileAsync(chunkedFiles[0]);
         var httpResponseMessage = await SendMessageChunk(initalMessageURI, fromMailboxId, toMailboxId, workflowId, initialChunk, file.FileName, 1, chunkedFiles.Count, localId, subject, includeChecksum);
 
-        var meshResponse = await ResponseHelper.CreateMeshResponse<SendMessageResponse>(httpResponseMessage, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
+        var initialMeshResponse = await ResponseHelper.CreateMeshResponse<SendMessageResponse>(httpResponseMessage, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
 
-        if (!meshResponse.IsSuccessful)
+        if (!initialMeshResponse.IsSuccessful)
         {
-            return meshResponse;
+            return initialMeshResponse;
         }
 
-        var messageId = meshResponse.Response.MessageId;
+        var messageId = initialMeshResponse.Response.MessageId;
 
         for (var i = 1; i < chunkedFiles.Count; i++)
         {
             Uri chunkMessageURI = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}/{messageId}/{i + 1}");
             var chunk = await FileHelpers.CompressFileAsync(chunkedFiles[i]);
             var chunkMeshResponse = await SendMessageChunk(chunkMessageURI, fromMailboxId, toMailboxId, workflowId, chunk, file.FileName, i + 1, chunkedFiles.Count, localId, subject, includeChecksum);
-            meshResponse = await ResponseHelper.CreateMeshResponse<SendMessageResponse>(chunkMeshResponse, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
+            var responseString = await chunkMeshResponse.Content.ReadAsStringAsync(); //TODO REMOVE
+            var meshResponse = await ResponseHelper.CreateMeshResponse<SendMessageResponse>(chunkMeshResponse, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
 
             if (!meshResponse.IsSuccessful)
             {
@@ -159,7 +158,7 @@ public class MeshOutboxService : IMeshOutboxService
 
         }
 
-        return meshResponse;
+        return initialMeshResponse;
 
     }
     /// <summary>

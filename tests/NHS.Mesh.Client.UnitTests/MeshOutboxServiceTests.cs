@@ -1,7 +1,9 @@
 namespace NHS.MESH.Client.UnitTests;
 
 using System.Net;
+using Microsoft.Extensions.Logging;
 using Moq;
+using NHS.Mesh.Client.TestingCommon;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
@@ -14,15 +16,20 @@ public class MeshOutboxServiceTests
     private readonly Mock<IMeshConnectConfiguration> _meshConnectConfiguration;
     private readonly Mock<IMeshConnectClient> _meshConnectClient;
     private readonly IMeshOutboxService _meshOutboxService;
+    private readonly Mock<ILogger<MeshOutboxService>> _logger;
 
     public MeshOutboxServiceTests()
     {
         _meshConnectConfiguration = new Mock<IMeshConnectConfiguration>(MockBehavior.Strict);
         _meshConnectClient = new Mock<IMeshConnectClient>(MockBehavior.Strict);
 
+        _logger = new Mock<ILogger<MeshOutboxService>>(MockBehavior.Loose);
+
         _meshOutboxService = new MeshOutboxService(
             _meshConnectConfiguration.Object,
-            _meshConnectClient.Object
+            _meshConnectClient.Object,
+            _logger.Object
+
         );
 
         // Setup default values for configuration mock
@@ -142,7 +149,7 @@ public class MeshOutboxServiceTests
         var fileAttachment = new FileAttachment
         {
             FileName = "FileName",
-            Content = UnitTestHelpers.CreateFakeFileContent(2 * 1024 * 1024),
+            Content = TestingHelpers.CreateFakeFileContent(2 * 1024 * 1024),
             ContentType = "application/octet-stream"
 
         };
@@ -272,7 +279,7 @@ public class MeshOutboxServiceTests
         var fileAttachment = new FileAttachment
         {
             FileName = "FileName",
-            Content = UnitTestHelpers.CreateFakeFileContent(2 * 1024 * 1024),
+            Content = TestingHelpers.CreateFakeFileContent(2 * 1024 * 1024),
             ContentType = "application/octet-stream"
 
         };
@@ -405,7 +412,7 @@ public class MeshOutboxServiceTests
         FileAttachment fileAttachment = new FileAttachment
         {
             FileName = "FileName",
-            Content = UnitTestHelpers.CreateFakeFileContent(9 * 1024 * 1024),
+            Content = TestingHelpers.CreateFakeFileContent(9 * 1024 * 1024),
             ContentType = "application/octet-stream"
         };
 

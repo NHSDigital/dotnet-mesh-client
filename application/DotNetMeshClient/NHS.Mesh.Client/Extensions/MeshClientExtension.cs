@@ -1,8 +1,6 @@
 namespace NHS.MESH.Client;
 using System.Net;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using NHS.MESH.Client.Clients;
 using NHS.MESH.Client.Configuration;
 using NHS.MESH.Client.Contracts.Clients;
@@ -24,7 +22,8 @@ public static class MeshClientServiceExtension
             ProxyUseDefaultCredentials = true,
             MeshApiInboxUriPath = "inbox",
             MeshApiOutboxUriPath = "outbox",
-            ChunkSize = 19 * 1024 * 1024
+            MeshApiAcknowledgeUriPath = "status/acknowledged",
+            ChunkSize = 19 * 1024 * 1024// below the 20mb limit for external
         };
 
         options(meshConnectConfiguration);

@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -9,10 +8,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHS.Mesh.Client.UnitTests",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHS.Mesh.Client.IntegrationTests", "..\..\..\tests\NHS.Mesh.Client.IntegrationTests\NHS.Mesh.Client.IntegrationTests.csproj", "{145C1034-0B9D-4487-83D0-71239136F87E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHS.Mesh.Client.TestingCommon", "..\..\..\tests\NHS.Mesh.Client.TestingCommon\NHS.Mesh.Client.TestingCommon.csproj", "{FD52A048-1961-48FB-889F-1E309F592B09}"
+EndProject
 Global
     GlobalSection(SolutionConfigurationPlatforms) = preSolution
-            Debug|Any CPU = Debug|Any CPU
-            Release|Any CPU = Release|Any CPU
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
     EndGlobalSection
     GlobalSection(SolutionProperties) = preSolution
         HideSolutionNode = FALSE
@@ -30,5 +31,9 @@ Global
         {145C1034-0B9D-4487-83D0-71239136F87E}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {145C1034-0B9D-4487-83D0-71239136F87E}.Release|Any CPU.ActiveCfg = Release|Any CPU
         {145C1034-0B9D-4487-83D0-71239136F87E}.Release|Any CPU.Build.0 = Release|Any CPU
+        {FD52A048-1961-48FB-889F-1E309F592B09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {FD52A048-1961-48FB-889F-1E309F592B09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {FD52A048-1961-48FB-889F-1E309F592B09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {FD52A048-1961-48FB-889F-1E309F592B09}.Release|Any CPU.Build.0 = Release|Any CPU
     EndGlobalSection
 EndGlobal

@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ContentSplitHelper.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
@@ -6,10 +6,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace NHS.MESH.Client.Helpers.ContentHelpers;
-using Microsoft.AspNetCore.Http;
-using NHS.MESH.Client.Models;
-using System.IO.Compression;
-using System.Reflection.Metadata;
 
 /// <summary>Provides helper functions for content split.</summary>
 public static class ContentSplitHelper
@@ -20,7 +16,7 @@ public static class ContentSplitHelper
     /// <param name="inputFilePath">The input Path.</param>
     /// <param name="chunkSize">The file size.</param>
     /// <returns></returns>
-    public static async Task<List<byte[]>> SplitFileToMemoryStreams(byte[] fileData, int chunkSize = 19 * 1024 * 1024)
+    public static async Task<List<byte[]>> SplitFileToByteArrays(byte[] fileData, int chunkSize = 19 * 1024 * 1024)
     {
         List<byte[]> chunks = new List<byte[]>();
 
@@ -30,7 +26,8 @@ public static class ContentSplitHelper
         long bytesLeft = memoryStream.Length;
         while (bytesLeft > 0)
         {
-            byte[] buffer = new byte[chunkSize];
+
+            byte[] buffer = new byte[(int)Math.Min(bytesLeft, chunkSize)];
 
 
             int bytesRead = await memoryStream.ReadAsync(buffer, 0, (int)Math.Min(bytesLeft, chunkSize));

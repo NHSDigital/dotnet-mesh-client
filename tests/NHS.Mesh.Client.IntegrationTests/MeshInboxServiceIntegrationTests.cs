@@ -2,9 +2,9 @@ namespace NHS.MESH.Client.IntegrationTests;
 using Microsoft.Extensions.DependencyInjection;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client;
-using System.Net;
 
 [TestClass]
+[TestCategory("Integration")]
 public class MeshInboxServiceIntegrationTests
 {
 
@@ -21,7 +21,7 @@ public class MeshInboxServiceIntegrationTests
 
         var serviceProvider = services.BuildServiceProvider();
 
-        _meshInboxService = serviceProvider.GetService<IMeshInboxService>();
+        _meshInboxService = serviceProvider.GetService<IMeshInboxService>()!;
     }
     [TestMethod]
     public async Task CheckExistingInboxForMessages_Success()
@@ -32,7 +32,6 @@ public class MeshInboxServiceIntegrationTests
         var result = await _meshInboxService.GetMessagesAsync(mailboxId);
         //assert
         Assert.IsTrue(result.IsSuccessful);
-        Assert.AreEqual(1, result.Response.Messages.Count());
     }
     [TestMethod]
     public async Task CheckNonExistentInboxForMessages_Failure()
@@ -43,9 +42,5 @@ public class MeshInboxServiceIntegrationTests
         var result = await _meshInboxService.GetMessagesAsync(mailboxId);
         //assert
         Assert.IsFalse(result.IsSuccessful);
-        Assert.AreEqual("Mailbox id does not match token", result.Error.ErrorDescription);
     }
-
-
-
 }

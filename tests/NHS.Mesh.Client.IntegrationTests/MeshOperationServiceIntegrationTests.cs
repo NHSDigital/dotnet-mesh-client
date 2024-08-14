@@ -2,9 +2,8 @@ namespace NHS.MESH.Client.IntegrationTests;
 using Microsoft.Extensions.DependencyInjection;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client;
-using System.Net;
-
 [TestClass]
+[TestCategory("Integration")]
 public class MeshOperationServiceIntegrationTests
 {
 

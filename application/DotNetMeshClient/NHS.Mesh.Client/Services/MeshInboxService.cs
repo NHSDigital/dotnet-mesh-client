@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MyClass.cs" company="NHS">
 // Copyright (c) NHS. All rights reserved.
 // Year: 2024
@@ -13,7 +13,6 @@ using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Contracts.Services;
 using NHS.MESH.Client.Helpers.AuthHelpers;
 using System.Text.Json;
-using System.ComponentModel;
 using System.Net;
 
 /// <summary>The MESH Inbox service.</summary>
@@ -137,11 +136,7 @@ public class MeshInboxService : IMeshInboxService
         for (int i = 2; i <= chunkRangeInts.chunkLength; i++)
         {
             var meshResponse = await GetMessageChunkAsync(mailboxId, messageId, i);
-            if (meshResponse.StatusCode == HttpStatusCode.OK)
-            {
-                throw new InvalidOperationException($"MessageId: {messageId} in MailBox: {mailboxId} is not a chunked message, Use the GetMessageByIdAsync method to get this message");
-            }
-            if (meshResponse.StatusCode != HttpStatusCode.PartialContent)
+            if (meshResponse.StatusCode != HttpStatusCode.PartialContent && meshResponse.StatusCode != HttpStatusCode.OK)
             {
                 return await ResponseHelper.CreateMeshResponse<GetChunkedMessageResponse>(initialMessage, _ => null);
             }
@@ -210,7 +205,9 @@ public class MeshInboxService : IMeshInboxService
                     WorkflowID = _.Headers.GetHeaderItemValue("mex-workflowid"),
                     ToMailbox = _.Headers.GetHeaderItemValue("mex-to"),
                     FromMailbox = _.Headers.GetHeaderItemValue("mex-from"),
-                    MessageId = _.Headers.GetHeaderItemValue("mex-messageid")
+                    MessageId = _.Headers.GetHeaderItemValue("mex-messageid"),
+                    FileName = _.Headers.GetHeaderItemValue("mex-filename"),
+                    MessageType = _.Headers.GetHeaderItemValue("mex-messagetype")
                 }
             };
         });
@@ -248,7 +245,7 @@ public class MeshInboxService : IMeshInboxService
         // Headers
         var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
         httpRequestMessage.Headers.Add("authorization", authHeader);
-        httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
+        httpRequestMessage.Headers.Add("accept", "*/*");
         httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
 
         // Get Messages

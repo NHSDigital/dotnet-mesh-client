@@ -1,8 +1,6 @@
 namespace NHS.MESH.Client.Helpers;
-using System.CodeDom.Compiler;
-using System.IO.Compression;
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
+using NHS.MESH.Client.Helpers.ContentHelpers;
 using NHS.MESH.Client.Models;
 
 public static class FileHelpers
@@ -72,55 +70,39 @@ public static class FileHelpers
 
     public static async Task<HttpContent> CompressFileAsync(byte[] data)
     {
-        using (var memoryStream = new MemoryStream())
-        {
-            using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
-            {
-                using (var fileStream = new MemoryStream(data))
-                {
-                    await fileStream.CopyToAsync(gzipStream);
-                }
-            }
+        var compressedData = GZIPHelpers.CompressBuffer(data);
 
-            memoryStream.Position = 0;
+        var content = new ByteArrayContent(compressedData);
 
-            var content = new StreamContent(memoryStream)
-            {
-                Headers =
-                {
-                    ContentType = new MediaTypeHeaderValue("application/octet-stream"),
-                    ContentEncoding = { "gzip" }
-                }
-            };
-
-            return content;
-        }
-
+        return content;
     }
 
-    public static async Task<HttpContent> CompressFileAsync(Stream stream)
+    public static async Task<FileAttachment> ReassembleChunkedFile(List<FileAttachment> fileChunks)
     {
-        using (var memoryStream = new MemoryStream())
-        {
-            using (var gzipStream = new GZipStream(memoryStream, CompressionMode.Compress, true))
-            {
-                await stream.CopyToAsync(gzipStream);
-            }
 
-            memoryStream.Position = 0;
+        var orderedChunks = fileChunks.OrderBy(i => i.ChunkNumber);
+        var firstChunk = orderedChunks.First();
 
-            var content = new StreamContent(memoryStream)
+        using(var memoryStream = new MemoryStream()){
+            int expectedChunkNumber = 1;
+            foreach(var file in orderedChunks)
             {
-                Headers =
+                if(file.ChunkNumber != expectedChunkNumber)
                 {
-                    ContentType = new MediaTypeHeaderValue("application/octet-stream"),
-                    ContentEncoding = { "gzip" }
+                    throw new ArgumentException("List was missing Chunks Cannot reassemble");
                 }
+                var decompressedData = GZIPHelpers.DeCompressBuffer(file.Content);
+                await memoryStream.WriteAsync(decompressedData);
+                expectedChunkNumber++;
+            }
+            return new FileAttachment
+            {
+                FileName = firstChunk.FileName,
+                ContentType = firstChunk.ContentType,
+                Content = memoryStream.ToArray()
             };
-            return content;
         }
 
+
     }
-
-
 }
