@@ -91,16 +91,6 @@ public class MeshUncompressedMessageTests
         //Assert
         Assert.IsTrue(acknowledgeMessageResponse.IsSuccessful);
         Assert.AreEqual(messageId, acknowledgeMessageResponse.Response.MessageId);
-
-
-
-
-
-
-
-
-
-
     }
 
 

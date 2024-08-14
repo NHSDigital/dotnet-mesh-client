@@ -1,7 +1,6 @@
 namespace NHS.MESH.Client.UnitTests;
 
 using System.Text;
-//using NHS.Mesh.Client.TestingCommon;
 using NHS.MESH.Client.Helpers.ContentHelpers;
 
 [TestClass]
@@ -9,12 +8,10 @@ public class FileChunkUnitTests
 {
 
     [TestMethod]
-    public async Task Split_File_to_Byte_Arrays_ReturnsExpectedChunks()
+    public async Task Split_File_to_Byte_Arrays_ReturnsExpectedChunkLengths()
     {
         //arrange
         var messageContent = "Michael Is testing Stuff";
-        var fileName = "TestFile.txt";
-        var contentType = "text/plain";
 
         int chunkSize = 19;
         byte[] data = Encoding.ASCII.GetBytes(messageContent);

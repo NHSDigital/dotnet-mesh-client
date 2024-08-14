@@ -1,3 +1,4 @@
+namespace NHS.MESH.Client.IntegrationTests;
 
 using System.Text;
 using NHS.MESH.Client.Models;

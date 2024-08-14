@@ -84,16 +84,16 @@ public static class FileHelpers
         var firstChunk = orderedChunks.First();
 
         using(var memoryStream = new MemoryStream()){
-            int i = 1;
+            int expectedChunkNumber = 1;
             foreach(var file in orderedChunks)
             {
-                if(file.ChunkNumber != i)
+                if(file.ChunkNumber != expectedChunkNumber)
                 {
                     throw new ArgumentException("List was missing Chunks Cannot reassemble");
                 }
                 var decompressedData = GZIPHelpers.DeCompressBuffer(file.Content);
                 await memoryStream.WriteAsync(decompressedData);
-                i++;
+                expectedChunkNumber++;
             }
             return new FileAttachment
             {
