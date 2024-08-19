@@ -6,8 +6,11 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace NHS.MESH.Client.Clients;
+
+using NHS.MESH.Client.Configuration;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
+using NHS.MESH.Client.Helpers.AuthHelpers;
 using NHS.MESH.Client.Models;
 using System.Net;
 using System.Net.Http;
@@ -25,13 +28,16 @@ public class MeshConnectClient : IMeshConnectClient
     /// <summary>The MESH Connect Configuration.</summary>
     private readonly IMeshConnectConfiguration _meshConnectConfiguration;
 
+    private readonly MailboxConfigurationResolver _mailboxConfigurationResolver;
+
     /// <summary>Initializes a new instance of the <see cref="MeshConnectClient"/> class.</summary>
     /// <param name="httpClientFactory">The HTTP Client.</param>
     /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
-    public MeshConnectClient(IHttpClientFactory httpClientFactory, IMeshConnectConfiguration meshConnectConfiguration)
+    public MeshConnectClient(IHttpClientFactory httpClientFactory, IMeshConnectConfiguration meshConnectConfiguration, MailboxConfigurationResolver mailboxConfigurationResolver)
     {
         _httpClientFactory = httpClientFactory;
         _meshConnectConfiguration = meshConnectConfiguration;
+        _mailboxConfigurationResolver = mailboxConfigurationResolver;
     }
 
     /// <summary>
@@ -39,8 +45,12 @@ public class MeshConnectClient : IMeshConnectClient
     /// </summary>
     /// <param name="httpRequestMessage">The HTTP Request Message.</param>
     /// <returns></returns>
-    public async Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage)
+    public async Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage, string mailboxId)
     {
+        MailboxConfiguration mailboxConfiguration = _mailboxConfigurationResolver.GetMailboxConfiguration(mailboxId);
+        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,null,mailboxConfiguration.Password,mailboxConfiguration.SharedKey);
+        httpRequestMessage.Headers.Add("authorization", authHeader);
+
         return await SendHttpRequest(httpRequestMessage);
     }
 

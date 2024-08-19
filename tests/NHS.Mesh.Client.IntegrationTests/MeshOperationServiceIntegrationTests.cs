@@ -15,11 +15,20 @@ public class MeshOperationServiceIntegrationTests
         services.AddMeshClient(options =>
         {
             options.MeshApiBaseUrl = "http://localhost:8700/messageexchange";
-            options.MeshApiHanshakeUriPath = "";
-            options.ProxyEnabled = false;
-            options.ProxyAddress = "http://proxy:8080";
-            options.ProxyUseDefaultCredentials = true;
-        });
+        })
+        .AddMailbox("X26ABC1",
+        new Configuration.MailboxConfiguration
+        {
+            Password = "password",
+            SharedKey = "TestKey"
+        })
+        .AddMailbox("NonExistentMailBox",
+        new Configuration.MailboxConfiguration
+        {
+            Password = "password",
+            SharedKey = "TestKey"
+        })
+        .Build();
 
         var serviceProvider = services.BuildServiceProvider();
 

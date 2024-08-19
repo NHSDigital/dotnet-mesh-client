@@ -130,7 +130,7 @@ public class MeshInboxServiceTests
 
         var response = UnitTestHelpers.CreateMockHttpResponseMessage<CheckInboxResponse>(checkInboxResponse, HttpStatusCode.OK);
 
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>(),mailboxId)).ReturnsAsync(response);
 
         //act
         var result = await _meshInboxService.GetMessagesAsync(mailboxId);
@@ -213,7 +213,7 @@ public class MeshInboxServiceTests
 
         var response = UnitTestHelpers.CreateMockHttpResponseMessage<GetMessageResponse>(getMessageReponse, HttpStatusCode.OK, headers);
 
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>(),mailboxId)).ReturnsAsync(response);
 
         //act
         var result = await _meshInboxService.GetMessageByIdAsync(mailboxId, messageId);
@@ -248,7 +248,7 @@ public class MeshInboxServiceTests
 
         var response = UnitTestHelpers.CreateMockHttpResponseMessage<HeadMessageResponse>(headMessageResponse, HttpStatusCode.OK, headers);
 
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.Is<HttpRequestMessage>(msg => msg.Method == HttpMethod.Head)))
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.Is<HttpRequestMessage>(msg => msg.Method == HttpMethod.Head),mailboxId))
             .ReturnsAsync(response);
 
         //act
@@ -274,7 +274,7 @@ public class MeshInboxServiceTests
 
         var response = UnitTestHelpers.CreateMockHttpResponseMessage<AcknowledgeMessageResponse>(acknowledgeMessageResponse, HttpStatusCode.OK);
 
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.Is<HttpRequestMessage>(msg => msg.Method == HttpMethod.Put)))
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.Is<HttpRequestMessage>(msg => msg.Method == HttpMethod.Put),mailboxId))
             .ReturnsAsync(response);
 
         //act

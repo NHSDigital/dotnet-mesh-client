@@ -21,8 +21,8 @@ public class MeshChunkedMessageTests
     private string fileName;
     private string contentType;
 
-    private const string toMailbox = "X26ABC1";
-    private const string fromMailbox = "X26ABC2";
+    private const string toMailbox = "X26ABC2";
+    private const string fromMailbox = "X26ABC1";
     private const string workflowId = "TEST-WORKFLOW";
 
     public MeshChunkedMessageTests()
@@ -32,7 +32,20 @@ public class MeshChunkedMessageTests
         services.AddMeshClient(options =>
         {
             options.MeshApiBaseUrl = "http://localhost:8700/messageexchange";
-        });
+        })
+        .AddMailbox(fromMailbox,
+        new Configuration.MailboxConfiguration
+        {
+            Password = "password",
+            SharedKey = "TestKey"
+        })
+        .AddMailbox(toMailbox,
+        new Configuration.MailboxConfiguration
+        {
+            Password = "password",
+            SharedKey = "TestKey"
+        })
+        .Build();
 
         var serviceProvider = services.BuildServiceProvider();
         _meshInboxService = serviceProvider.GetService<IMeshInboxService>()!;

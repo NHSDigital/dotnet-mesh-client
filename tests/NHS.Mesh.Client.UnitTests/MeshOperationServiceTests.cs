@@ -91,7 +91,7 @@ public class MeshOperationServiceTests
 
         _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns(meshApiBaseUrl);
         _meshConnectConfiguration.SetupGet(c => c.MaxRetries).Returns(3);
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>(),mailboxId)).ReturnsAsync(response);
 
         // Act
         var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
@@ -116,7 +116,7 @@ public class MeshOperationServiceTests
 
         _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns(meshApiBaseUrl);
         _meshConnectConfiguration.SetupGet(c => c.MaxRetries).Returns(3);
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>()))
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>(),mailboxId))
             .ReturnsAsync(httpResponseMock);
 
         // Act
@@ -138,7 +138,7 @@ public class MeshOperationServiceTests
 
         _meshConnectConfiguration.SetupGet(c => c.MeshApiBaseUrl).Returns(meshApiBaseUrl);
         _meshConnectConfiguration.SetupGet(c => c.MaxRetries).Returns(3);
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ThrowsAsync(new HttpRequestException("Request failed"));
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>(),mailboxId)).ThrowsAsync(new HttpRequestException("Request failed"));
 
         //act
         try

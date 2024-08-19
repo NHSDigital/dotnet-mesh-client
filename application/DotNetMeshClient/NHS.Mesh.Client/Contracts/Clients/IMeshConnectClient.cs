@@ -17,5 +17,5 @@ public interface IMeshConnectClient
     /// </summary>
     /// <param name="httpRequestMessage">The HTTP Request Message.</param>
     /// <returns></returns>
-    Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage);
+    Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage, string mailboxId);
 }

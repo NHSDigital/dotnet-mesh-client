@@ -28,9 +28,20 @@ public class MeshUncompressedMessageTests
         services.AddMeshClient(options =>
         {
             options.MeshApiBaseUrl = "http://localhost:8700/messageexchange";
-            options.MeshApiHanshakeUriPath = "";
-        });
-
+        })
+        .AddMailbox(toMailbox,
+        new Configuration.MailboxConfiguration
+        {
+            Password = "password",
+            SharedKey = "TestKey"
+        })
+        .AddMailbox(fromMailbox,
+        new Configuration.MailboxConfiguration
+        {
+            Password = "password",
+            SharedKey = "TestKey"
+        })
+        .Build();
         var serviceProvider = services.BuildServiceProvider();
 
         _meshInboxService = serviceProvider.GetService<IMeshInboxService>();

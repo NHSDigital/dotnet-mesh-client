@@ -63,13 +63,11 @@ public class MeshOperationService : IMeshOperationService
         httpRequestMessage.Method = HttpMethod.Get;
 
         // Headers
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-        httpRequestMessage.Headers.Add("authorization", authHeader);
         //httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
         httpRequestMessage.Headers.Add("accept", "*/*");
         httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
 
-        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage,mailboxId);
         var stringContent = await meshResponse.Content.ReadAsStringAsync();
 
         var response = await ResponseHelper.CreateMeshResponse<HandshakeResponse>(meshResponse, async _ => JsonSerializer.Deserialize<HandshakeResponse>(await _.Content.ReadAsStringAsync()));

@@ -188,12 +188,10 @@ public class MeshOutboxService : IMeshOutboxService
         httpRequestMessage.RequestUri = uri;
 
         // Headers
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-        httpRequestMessage.Headers.Add("authorization", authHeader);
         httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
 
         // Get Messages
-        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage,mailboxId);
 
         return await ResponseHelper.CreateMeshResponse<TrackOutboxResponse>(meshResponse, async _ => JsonSerializer.Deserialize<TrackOutboxResponse>(await _.Content.ReadAsStringAsync()));
     }
@@ -203,7 +201,7 @@ public class MeshOutboxService : IMeshOutboxService
     private async Task<HttpResponseMessage> SendSingleMessage(Uri uri, string fromMailboxId, string toMailboxId, string workflowId, HttpContent content, string fileName, string? localId = null, string? subject = null, bool includeChecksum = false)
     {
         var httpRequestMessage = await BuildMessage(uri, fromMailboxId, toMailboxId, workflowId, content, fileName, localId, subject, includeChecksum);
-        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage,fromMailboxId);
 
         return meshResponse;
 
@@ -213,7 +211,7 @@ public class MeshOutboxService : IMeshOutboxService
     {
         var httpRequestMessage = await BuildMessage(uri, fromMailboxId, toMailboxId, workflowId, content, fileName, localId, subject, includeChecksum);
         httpRequestMessage.Headers.Add("mex-chunk-range", FileHelpers.CreateChunkRange(chunkNumber, chunkLength));
-        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage,fromMailboxId);
         return meshResponse;
 
     }
@@ -226,8 +224,6 @@ public class MeshOutboxService : IMeshOutboxService
             RequestUri = uri
         };
 
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(fromMailboxId);
-        httpRequestMessage.Headers.Add("authorization", authHeader);
         httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
         httpRequestMessage.Headers.Add("mex-from", fromMailboxId);
         httpRequestMessage.Headers.Add("mex-to", toMailboxId);
