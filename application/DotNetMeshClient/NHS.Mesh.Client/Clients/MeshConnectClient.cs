@@ -57,6 +57,8 @@ public class MeshConnectClient : IMeshConnectClient
 
     private async Task<HttpResponseMessage> SendHttpRequest(HttpRequestMessage httpRequestMessage,MailboxConfiguration mailboxConfiguration)
     {
+
+        using var handler = new HttpClientHandler();
         httpRequestMessage = addHeaders(httpRequestMessage);
         var timeInSeconds = _meshConnectConfiguration.TimeoutInSeconds;
 
@@ -64,18 +66,15 @@ public class MeshConnectClient : IMeshConnectClient
 
         if(mailboxConfiguration.Cert != null)
         {
-            using var handler = new HttpClientHandler();
+
             var certificate = mailboxConfiguration.Cert;
             handler.ClientCertificateOptions = ClientCertificateOption.Manual;
             handler.ClientCertificates.Add(certificate);
-
-            httpClient = new HttpClient(handler);
-
         }
-        else
-        {
-            httpClient = new HttpClient();
-        }
+
+        httpClient = new HttpClient(handler);
+
+
 
         httpClient.Timeout = TimeSpan.FromSeconds(timeInSeconds);
         var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
