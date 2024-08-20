@@ -16,6 +16,7 @@ public interface IMeshConnectClient
     /// Asynchronously sends a request using the route configuration specified.
     /// </summary>
     /// <param name="httpRequestMessage">The HTTP Request Message.</param>
+    /// <param name="mailboxId">The Sending Mailboxid</param>
     /// <returns></returns>
     Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage, string mailboxId);
 }

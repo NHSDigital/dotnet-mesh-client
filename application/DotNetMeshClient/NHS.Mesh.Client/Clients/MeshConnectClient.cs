@@ -22,9 +22,6 @@ public class MeshConnectClient : IMeshConnectClient
     /// <summary>The MESH Connect client name constant.</summary>
     //private const string MeshConnectClientName = "MeshConnectClient";
 
-    /// <summary>The HTTP client factory.</summary>
-    private readonly IHttpClientFactory _httpClientFactory;
-
     /// <summary>The MESH Connect Configuration.</summary>
     private readonly IMeshConnectConfiguration _meshConnectConfiguration;
 
@@ -33,9 +30,8 @@ public class MeshConnectClient : IMeshConnectClient
     /// <summary>Initializes a new instance of the <see cref="MeshConnectClient"/> class.</summary>
     /// <param name="httpClientFactory">The HTTP Client.</param>
     /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
-    public MeshConnectClient(IHttpClientFactory httpClientFactory, IMeshConnectConfiguration meshConnectConfiguration, MailboxConfigurationResolver mailboxConfigurationResolver)
+    public MeshConnectClient(IMeshConnectConfiguration meshConnectConfiguration, MailboxConfigurationResolver mailboxConfigurationResolver)
     {
-        _httpClientFactory = httpClientFactory;
         _meshConnectConfiguration = meshConnectConfiguration;
         _mailboxConfigurationResolver = mailboxConfigurationResolver;
     }
@@ -66,7 +62,6 @@ public class MeshConnectClient : IMeshConnectClient
 
         if(mailboxConfiguration.Cert != null)
         {
-
             var certificate = mailboxConfiguration.Cert;
             handler.ClientCertificateOptions = ClientCertificateOption.Manual;
             handler.ClientCertificates.Add(certificate);
@@ -79,11 +74,10 @@ public class MeshConnectClient : IMeshConnectClient
             }
         }
 
-        httpClient = new HttpClient(handler);
-
-
-
-        httpClient.Timeout = TimeSpan.FromSeconds(timeInSeconds);
+        httpClient = new HttpClient(handler)
+        {
+            Timeout = TimeSpan.FromSeconds(timeInSeconds)
+        };
         var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
 
         return httpResponseMessage;

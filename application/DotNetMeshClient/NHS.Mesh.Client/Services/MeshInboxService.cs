@@ -61,8 +61,6 @@ public class MeshInboxService : IMeshInboxService
         httpRequestMessage.Method = HttpMethod.Get;
 
         // Headers
-        // var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-        // httpRequestMessage.Headers.Add("authorization", authHeader);
         httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
 
         // Get Messages
@@ -187,8 +185,6 @@ public class MeshInboxService : IMeshInboxService
         httpRequestMessage.Method = HttpMethod.Head;
 
         // Headers
-        // var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-        // httpRequestMessage.Headers.Add("authorization", authHeader);
         httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
         httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
 
