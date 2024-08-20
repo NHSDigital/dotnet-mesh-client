@@ -70,11 +70,13 @@ public class MeshConnectClient : IMeshConnectClient
             var certificate = mailboxConfiguration.Cert;
             handler.ClientCertificateOptions = ClientCertificateOption.Manual;
             handler.ClientCertificates.Add(certificate);
-            // handler.ServerCertificateCustomValidationCallback =
-            //     (httpRequestMessage, cert, cetChain, policyErrors) =>
-            // {
-            //     return true;
-            // }; //ignores if the ca is
+            if(httpRequestMessage.RequestUri.Host == "localhost"){
+                handler.ServerCertificateCustomValidationCallback =
+                    (httpRequestMessage, cert, cetChain, policyErrors) =>
+                {
+                    return true;
+                }; //ignores the ca for localhost testing
+            }
         }
 
         httpClient = new HttpClient(handler);
