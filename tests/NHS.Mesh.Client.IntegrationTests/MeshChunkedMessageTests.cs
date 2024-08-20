@@ -6,6 +6,7 @@ using NHS.MESH.Client.Models;
 using NHS.MESH.Client.Contracts.Configurations;
 using NHS.MESH.Client.Helpers;
 using NHS.Mesh.Client.TestingCommon;
+using System.Security.Cryptography.X509Certificates;
 
 [TestClass]
 [TestCategory("Integration")]

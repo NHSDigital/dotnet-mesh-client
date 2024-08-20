@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 public class MeshConnectClient : IMeshConnectClient
 {
     /// <summary>The MESH Connect client name constant.</summary>
-    private const string MeshConnectClientName = "MeshConnectClient";
+    //private const string MeshConnectClientName = "MeshConnectClient";
 
     /// <summary>The HTTP client factory.</summary>
     private readonly IHttpClientFactory _httpClientFactory;
@@ -48,18 +48,35 @@ public class MeshConnectClient : IMeshConnectClient
     public async Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage, string mailboxId)
     {
         MailboxConfiguration mailboxConfiguration = _mailboxConfigurationResolver.GetMailboxConfiguration(mailboxId);
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,null,mailboxConfiguration.Password,mailboxConfiguration.SharedKey);
+        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,mailboxConfiguration.Password!,mailboxConfiguration.SharedKey!);
         httpRequestMessage.Headers.Add("authorization", authHeader);
 
-        return await SendHttpRequest(httpRequestMessage);
+        return await SendHttpRequest(httpRequestMessage,mailboxConfiguration);
     }
 
 
-    private async Task<HttpResponseMessage> SendHttpRequest(HttpRequestMessage httpRequestMessage)
+    private async Task<HttpResponseMessage> SendHttpRequest(HttpRequestMessage httpRequestMessage,MailboxConfiguration mailboxConfiguration)
     {
         httpRequestMessage = addHeaders(httpRequestMessage);
         var timeInSeconds = _meshConnectConfiguration.TimeoutInSeconds;
-        var httpClient = _httpClientFactory.CreateClient(MeshConnectClientName);
+
+        HttpClient httpClient;
+
+        if(mailboxConfiguration.Cert != null)
+        {
+            using var handler = new HttpClientHandler();
+            var certificate = mailboxConfiguration.Cert;
+            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            handler.ClientCertificates.Add(certificate);
+
+            httpClient = new HttpClient(handler);
+
+        }
+        else
+        {
+            httpClient = new HttpClient();
+        }
+
         httpClient.Timeout = TimeSpan.FromSeconds(timeInSeconds);
         var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
 

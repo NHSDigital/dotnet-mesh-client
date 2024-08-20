@@ -10,6 +10,9 @@
 *.code-workspace
 !project.code-workspace
 
+*.pem
+*.key
+
 # Please, add your custom content below!
 
 
