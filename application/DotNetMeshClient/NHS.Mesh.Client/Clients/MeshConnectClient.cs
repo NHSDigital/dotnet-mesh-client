@@ -55,7 +55,7 @@ public class MeshConnectClient : IMeshConnectClient
     {
 
         using var handler = new HttpClientHandler();
-        httpRequestMessage = addHeaders(httpRequestMessage);
+        httpRequestMessage = AddHeaders(httpRequestMessage);
         var timeInSeconds = _meshConnectConfiguration.TimeoutInSeconds;
 
         HttpClient httpClient;
@@ -83,7 +83,7 @@ public class MeshConnectClient : IMeshConnectClient
         return httpResponseMessage;
     }
 
-    private HttpRequestMessage addHeaders(HttpRequestMessage httpRequestMessage)
+    private HttpRequestMessage AddHeaders(HttpRequestMessage httpRequestMessage)
     {
         OperatingSystem operatingSystem = Environment.OSVersion;
         var osArchitecture = Environment.Is64BitOperatingSystem ? "x86_64" : "x86_32";
