@@ -16,8 +16,20 @@ public class MeshInboxServiceIntegrationTests
         services.AddMeshClient(options =>
         {
             options.MeshApiBaseUrl = "http://localhost:8700/messageexchange";
-            options.MeshApiHanshakeUriPath = "";
-        });
+        })
+        .AddMailbox("X26ABC1",
+        new Configuration.MailboxConfiguration
+        {
+            Password = "password",
+            SharedKey = "TestKey"
+        })
+        .AddMailbox("X26ABC12",
+        new Configuration.MailboxConfiguration
+        {
+            Password = "password",
+            SharedKey = "TestKey"
+        })
+        .Build();
 
         var serviceProvider = services.BuildServiceProvider();
 

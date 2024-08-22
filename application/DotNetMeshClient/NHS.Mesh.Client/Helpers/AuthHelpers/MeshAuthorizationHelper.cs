@@ -15,9 +15,9 @@ public static class MeshAuthorizationHelper
 
     public static string GenerateAuthHeaderValue(
         string mailboxId,
+        string password,
+        string sharedKey,
         string? timestamp = null,
-        string password = "password",
-        string sharedKey = "TestKey",
         string? nonce = null,
         int nonceCount = 0)
     {

@@ -4,35 +4,25 @@ using System.IO.Compression;
 
 public class GZIPHelpers
 {
-    public static byte[] CompressBuffer(byte[]  byteArray)
+    public static byte[] CompressBuffer(byte[]  data)
     {
-        MemoryStream strm = new MemoryStream();
-        GZipStream GZipStrem = new GZipStream(strm, CompressionMode.Compress, true);
-        GZipStrem.Write(byteArray, 0, byteArray.Length);
-        GZipStrem.Flush();
-        strm.Flush();
-        byte[]  ByteArrayToreturn= strm.GetBuffer();
-        GZipStrem.Close();
-        strm.Close();
-        return ByteArrayToreturn;
+        using (var compressedStream = new MemoryStream())
+        using (var zipStream = new GZipStream(compressedStream, CompressionMode.Compress))
+        {
+            zipStream.Write(data, 0, data.Length);
+            zipStream.Close();
+            return compressedStream.ToArray();
+        }
     }
     public static byte[] DeCompressBuffer(byte[] byteArray)
     {
-        MemoryStream strm = new MemoryStream(byteArray);
-        GZipStream GZipStrem = new GZipStream(strm, CompressionMode.Decompress,true);
-        List<byte> ByteListUncompressedData = new List<byte>();
-
-        int bytesRead = GZipStrem.ReadByte();
-        while (bytesRead != -1)
+        MemoryStream stream = new MemoryStream(byteArray);
+        GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress);
+        using (var resultStream = new MemoryStream())
         {
-            ByteListUncompressedData.Add((byte)bytesRead);
-            bytesRead = GZipStrem.ReadByte();
+            gZipStream.CopyTo(resultStream);
+            return resultStream.ToArray();
         }
-        GZipStrem.Flush();
-        strm.Flush();
-        GZipStrem.Close();
-        strm.Close();
-        return ByteListUncompressedData.ToArray();
     }
 
 }

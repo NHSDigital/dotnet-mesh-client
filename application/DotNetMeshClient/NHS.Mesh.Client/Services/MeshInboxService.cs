@@ -61,12 +61,10 @@ public class MeshInboxService : IMeshInboxService
         httpRequestMessage.Method = HttpMethod.Get;
 
         // Headers
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-        httpRequestMessage.Headers.Add("authorization", authHeader);
         httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
 
         // Get Messages
-        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage,mailboxId);
 
         return await ResponseHelper.CreateMeshResponse<CheckInboxResponse>(meshResponse, async _ => JsonSerializer.Deserialize<CheckInboxResponse>(await _.Content.ReadAsStringAsync()));
 
@@ -187,13 +185,11 @@ public class MeshInboxService : IMeshInboxService
         httpRequestMessage.Method = HttpMethod.Head;
 
         // Headers
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-        httpRequestMessage.Headers.Add("authorization", authHeader);
         httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
         httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
 
         // Get Messages
-        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage,mailboxId);
 
         return await ResponseHelper.CreateMeshResponse<HeadMessageResponse>(meshResponse, async _ =>
         {
@@ -248,13 +244,11 @@ public class MeshInboxService : IMeshInboxService
         httpRequestMessage.Method = HttpMethod.Put;
 
         // Headers
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-        httpRequestMessage.Headers.Add("authorization", authHeader);
         httpRequestMessage.Headers.Add("accept", "*/*");
         httpRequestMessage.Headers.Add("User_Agent", "my-client;windows-10;");
 
         // Get Messages
-        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage,mailboxId);
 
         return await ResponseHelper.CreateMeshResponse<AcknowledgeMessageResponse>(meshResponse, async _ => JsonSerializer.Deserialize<AcknowledgeMessageResponse>(await _.Content.ReadAsStringAsync()));
 
@@ -284,12 +278,10 @@ public class MeshInboxService : IMeshInboxService
         httpRequestMessage.Method = HttpMethod.Get;
 
         // Headers
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId);
-        httpRequestMessage.Headers.Add("authorization", authHeader);
         httpRequestMessage.Headers.Add("accept", "application/vnd.mesh.v2+json");
 
         // Get Messages
-        return await _meshConnectClient.SendRequestAsync(httpRequestMessage);
+        return await _meshConnectClient.SendRequestAsync(httpRequestMessage,mailboxId);
 
     }
     #endregion

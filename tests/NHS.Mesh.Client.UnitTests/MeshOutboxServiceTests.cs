@@ -162,7 +162,7 @@ public class MeshOutboxServiceTests
 
         var response = UnitTestHelpers.CreateMockHttpResponseMessage<SendMessageResponse>(sendMessageResponse, HttpStatusCode.OK);
 
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>(),fromMailboxId)).ReturnsAsync(response);
 
         // Act
         var result = await _meshOutboxService.SendCompressedMessageAsync(fromMailboxId, toMailboxId, workflowId, fileAttachment);
@@ -292,7 +292,7 @@ public class MeshOutboxServiceTests
         var response = UnitTestHelpers.CreateMockHttpResponseMessage<SendMessageResponse>(sendMessageResponse, HttpStatusCode.OK);
 
         _meshConnectConfiguration.SetupGet(i => i.ChunkSize).Returns(5 * 1024 * 1024);
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(response);
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>(),fromMailboxId)).ReturnsAsync(response);
 
         // Act
         var result = await _meshOutboxService.SendUnCompressedMessageAsync(fromMailboxId, toMailboxId, workflowId, fileAttachment);
@@ -422,14 +422,14 @@ public class MeshOutboxServiceTests
         };
         _meshConnectConfiguration.SetupGet(i => i.ChunkSize).Returns(5 * 1024 * 1024);
 
-        _meshConnectClient.Setup(i => i.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(UnitTestHelpers.CreateMockHttpResponseMessage<SendMessageResponse>(response, HttpStatusCode.OK));
+        _meshConnectClient.Setup(i => i.SendRequestAsync(It.IsAny<HttpRequestMessage>(),fromMailboxId)).ReturnsAsync(UnitTestHelpers.CreateMockHttpResponseMessage<SendMessageResponse>(response, HttpStatusCode.OK));
 
 
         // Act
         var result = await _meshOutboxService.SendChunkedMessageAsync(fromMailboxId, toMailboxId, workflowId, fileAttachment);
 
         // Assert
-        _meshConnectClient.Verify(i => i.SendRequestAsync(It.IsAny<HttpRequestMessage>()), Times.Exactly(2));
+        _meshConnectClient.Verify(i => i.SendRequestAsync(It.IsAny<HttpRequestMessage>(),fromMailboxId), Times.Exactly(2));
         Assert.IsTrue(result.IsSuccessful);
         Assert.AreEqual(messageId, result.Response.MessageId);
     }
@@ -527,7 +527,7 @@ public class MeshOutboxServiceTests
         _meshConnectConfiguration.SetupGet(c => c.MeshApiInboxUriPath).Returns("inbox");
         _meshConnectConfiguration.SetupGet(c => c.MeshApiTrackMessageUriPath).Returns("track");
 
-        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>())).ReturnsAsync(UnitTestHelpers.CreateMockHttpResponseMessage<TrackOutboxResponse>(trackOutboxResponse, HttpStatusCode.OK));
+        _meshConnectClient.Setup(c => c.SendRequestAsync(It.IsAny<HttpRequestMessage>(),mailboxId)).ReturnsAsync(UnitTestHelpers.CreateMockHttpResponseMessage<TrackOutboxResponse>(trackOutboxResponse, HttpStatusCode.OK));
 
         // Act
         var result = await _meshOutboxService.TrackMessageByIdAsync(mailboxId, messageId);
