@@ -49,12 +49,22 @@ public class MeshConnectClient : IMeshConnectClient
     /// <returns></returns>
     public async Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage, string mailboxId)
     {
-        _logger.LogInformation("Sending HttpRequest to mesh");
-        MailboxConfiguration mailboxConfiguration = _mailboxConfigurationResolver.GetMailboxConfiguration(mailboxId);
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,mailboxConfiguration.Password!,mailboxConfiguration.SharedKey!);
-        httpRequestMessage.Headers.Add("authorization", authHeader);
-
-        return await SendHttpRequest(httpRequestMessage,mailboxConfiguration);
+        try
+        {
+            _logger.LogInformation($"Sending HttpRequest to mesh: { httpRequestMessage.RequestUri }");
+            MailboxConfiguration mailboxConfiguration = _mailboxConfigurationResolver.GetMailboxConfiguration(mailboxId);
+            var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,mailboxConfiguration.Password!,mailboxConfiguration.SharedKey!);
+            httpRequestMessage.Headers.Add("authorization", authHeader);
+            var result = await SendHttpRequest(httpRequestMessage,mailboxConfiguration);
+            var contentString = await result.Content.ReadAsStringAsync();
+            _logger.LogInformation(contentString);
+            return result;
+        }
+        catch(Exception ex)
+        {
+            _logger.LogCritical(ex,"Exception encountered while calling MESH API");
+            throw;
+        }
     }
 
 
@@ -69,13 +79,13 @@ public class MeshConnectClient : IMeshConnectClient
 
         if(mailboxConfiguration.Cert != null)
         {
-            byte[] pfxRawData = mailboxConfiguration.Cert.Export(X509ContentType.Pfx, "123456");
+            // byte[] pfxRawData = mailboxConfiguration.Cert.Export(X509ContentType.Pfx, "123456");
 
-            using (X509Certificate2 pfxCertWithKey = new X509Certificate2(pfxRawData, "123456"))
-            {
+            // using (X509Certificate2 pfxCertWithKey = new X509Certificate2(pfxRawData, "123456"))
+            // {
                 _logger.LogInformation("Adding Certificate to HTTP Call");
                 handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-                handler.ClientCertificates.Add(pfxCertWithKey);
+                handler.ClientCertificates.Add(mailboxConfiguration.Cert);
                 //handler.SslProtocols.Tls12;
                 handler.SslProtocols = SslProtocols.Tls12;
                 //if(httpRequestMessage.RequestUri.Host == "localhost"){
@@ -86,7 +96,7 @@ public class MeshConnectClient : IMeshConnectClient
                         return true;
                     }; //ignores the ca for localhost testing
                 //}
-            }
+            //}
         }
 
         httpClient = new HttpClient(handler)
