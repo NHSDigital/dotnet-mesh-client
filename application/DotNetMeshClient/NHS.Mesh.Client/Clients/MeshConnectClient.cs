@@ -7,6 +7,7 @@
 
 namespace NHS.MESH.Client.Clients;
 
+using Microsoft.Extensions.Logging;
 using NHS.MESH.Client.Configuration;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
@@ -15,6 +16,8 @@ using NHS.MESH.Client.Models;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 
 /// <summary>The MESH connect client for MESH API calls.</summary>
 public class MeshConnectClient : IMeshConnectClient
@@ -27,13 +30,16 @@ public class MeshConnectClient : IMeshConnectClient
 
     private readonly MailboxConfigurationResolver _mailboxConfigurationResolver;
 
+    private readonly ILogger<MeshConnectClient> _logger;
+
     /// <summary>Initializes a new instance of the <see cref="MeshConnectClient"/> class.</summary>
     /// <param name="httpClientFactory">The HTTP Client.</param>
     /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
-    public MeshConnectClient(IMeshConnectConfiguration meshConnectConfiguration, MailboxConfigurationResolver mailboxConfigurationResolver)
+    public MeshConnectClient(IMeshConnectConfiguration meshConnectConfiguration, MailboxConfigurationResolver mailboxConfigurationResolver, ILogger<MeshConnectClient> logger)
     {
         _meshConnectConfiguration = meshConnectConfiguration;
         _mailboxConfigurationResolver = mailboxConfigurationResolver;
+        _logger = logger;
     }
 
     /// <summary>
@@ -43,6 +49,7 @@ public class MeshConnectClient : IMeshConnectClient
     /// <returns></returns>
     public async Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage, string mailboxId)
     {
+        _logger.LogInformation("Sending HttpRequest to mesh");
         MailboxConfiguration mailboxConfiguration = _mailboxConfigurationResolver.GetMailboxConfiguration(mailboxId);
         var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,mailboxConfiguration.Password!,mailboxConfiguration.SharedKey!);
         httpRequestMessage.Headers.Add("authorization", authHeader);
@@ -62,15 +69,23 @@ public class MeshConnectClient : IMeshConnectClient
 
         if(mailboxConfiguration.Cert != null)
         {
-            var certificate = mailboxConfiguration.Cert;
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ClientCertificates.Add(certificate);
-            if(httpRequestMessage.RequestUri.Host == "localhost"){
-                handler.ServerCertificateCustomValidationCallback =
-                    (httpRequestMessage, cert, cetChain, policyErrors) =>
-                {
-                    return true;
-                }; //ignores the ca for localhost testing
+            byte[] pfxRawData = mailboxConfiguration.Cert.Export(X509ContentType.Pfx, "123456");
+
+            using (X509Certificate2 pfxCertWithKey = new X509Certificate2(pfxRawData, "123456"))
+            {
+                _logger.LogInformation("Adding Certificate to HTTP Call");
+                handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+                handler.ClientCertificates.Add(pfxCertWithKey);
+                //handler.SslProtocols.Tls12;
+                handler.SslProtocols = SslProtocols.Tls12;
+                //if(httpRequestMessage.RequestUri.Host == "localhost"){
+                    handler.ServerCertificateCustomValidationCallback =
+                        (httpRequestMessage, cert, cetChain, policyErrors) =>
+                    {
+                        _logger.LogWarning("Bypassing Server certificate Validation Check");
+                        return true;
+                    }; //ignores the ca for localhost testing
+                //}
             }
         }
 
