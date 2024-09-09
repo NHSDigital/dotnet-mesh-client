@@ -92,6 +92,15 @@ public class MeshConnectClient : IMeshConnectClient
                     handler.ServerCertificateCustomValidationCallback =
                         (httpRequestMessage, cert, cetChain, policyErrors) =>
                     {
+                            // It is possible to inspect the certificate provided by the server.
+                        _logger.LogInformation($"Requested URI: {httpRequestMessage.RequestUri}");
+                        _logger.LogInformation($"Effective date: {cert?.GetEffectiveDateString()}");
+                        _logger.LogInformation($"Exp date: {cert?.GetExpirationDateString()}");
+                        _logger.LogInformation($"Issuer: {cert?.Issuer}");
+                        _logger.LogInformation($"Subject: {cert?.Subject}");
+
+                        // Based on the custom logic it is possible to decide whether the client considers certificate valid or not
+                        _logger.LogInformation($"Errors: {policyErrors}");
                         _logger.LogWarning("Bypassing Server certificate Validation Check");
                         return true;
                     }; //ignores the ca for localhost testing
