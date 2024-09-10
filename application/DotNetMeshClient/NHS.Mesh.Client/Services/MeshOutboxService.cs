@@ -63,7 +63,7 @@ public class MeshOutboxService : IMeshOutboxService
 
         // Body
         var content = await FileHelpers.CompressFileAsync(file.Content);
-        var meshResponse = await SendSingleMessage(uri, fromMailboxId, toMailboxId, workflowId, content, file.FileName, localId, subject, includeChecksum);
+        var meshResponse = await SendSingleCompressedMessage(uri, fromMailboxId, toMailboxId, workflowId, content, file.FileName, localId, subject, includeChecksum);
         return await ResponseHelper.CreateMeshResponse<SendMessageResponse>(meshResponse, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
 
     }
@@ -148,7 +148,6 @@ public class MeshOutboxService : IMeshOutboxService
             Uri chunkMessageURI = new Uri($"{_meshConnectConfiguration.MeshApiBaseUrl}/{fromMailboxId}/{_meshConnectConfiguration.MeshApiOutboxUriPath}/{messageId}/{i + 1}");
             var chunk = await FileHelpers.CompressFileAsync(chunkedFiles[i]);
             var chunkMeshResponse = await SendMessageChunk(chunkMessageURI, fromMailboxId, toMailboxId, workflowId, chunk, file.FileName, i + 1, chunkedFiles.Count, localId, subject, includeChecksum);
-            var responseString = await chunkMeshResponse.Content.ReadAsStringAsync(); //TODO REMOVE
             var meshResponse = await ResponseHelper.CreateMeshResponse<SendMessageResponse>(chunkMeshResponse, async _ => JsonSerializer.Deserialize<SendMessageResponse>(await _.Content.ReadAsStringAsync()));
 
             if (!meshResponse.IsSuccessful)
@@ -201,6 +200,16 @@ public class MeshOutboxService : IMeshOutboxService
     private async Task<HttpResponseMessage> SendSingleMessage(Uri uri, string fromMailboxId, string toMailboxId, string workflowId, HttpContent content, string fileName, string? localId = null, string? subject = null, bool includeChecksum = false)
     {
         var httpRequestMessage = await BuildMessage(uri, fromMailboxId, toMailboxId, workflowId, content, fileName, localId, subject, includeChecksum);
+        var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage,fromMailboxId);
+
+        return meshResponse;
+
+    }
+
+    private async Task<HttpResponseMessage> SendSingleCompressedMessage(Uri uri, string fromMailboxId, string toMailboxId, string workflowId, HttpContent content, string fileName, string? localId = null, string? subject = null, bool includeChecksum = false)
+    {
+        var httpRequestMessage = await BuildMessage(uri, fromMailboxId, toMailboxId, workflowId, content, fileName, localId, subject, includeChecksum);
+        httpRequestMessage.Headers.TryAddWithoutValidation("content-encoding","GZIP");
         var meshResponse = await _meshConnectClient.SendRequestAsync(httpRequestMessage,fromMailboxId);
 
         return meshResponse;

@@ -5,7 +5,7 @@ using NHS.MESH.Client.Models;
 
 public static class FileHelpers
 {
-    public static async Task<FileAttachment> CreateFileAttachment(HttpResponseMessage httpResponseMessage)
+    internal static async Task<FileAttachment> CreateFileAttachment(HttpResponseMessage httpResponseMessage)
     {
 
         int? chunkNumber = null;
@@ -26,14 +26,17 @@ public static class FileHelpers
         };
         return fileAttachment;
     }
-    public static MessageMetaData CreateMessageMetaData(HttpResponseMessage httpResponseMessage)
+    internal static MessageMetaData CreateMessageMetaData(HttpResponseMessage httpResponseMessage)
     {
         return new MessageMetaData
         {
             WorkflowID = httpResponseMessage.Headers.GetHeaderItemValue("mex-workflowid"),
             ToMailbox = httpResponseMessage.Headers.GetHeaderItemValue("mex-to"),
             FromMailbox = httpResponseMessage.Headers.GetHeaderItemValue("mex-from"),
-            MessageId = httpResponseMessage.Headers.GetHeaderItemValue("mex-messageid")
+            MessageId = httpResponseMessage.Headers.GetHeaderItemValue("mex-messageid"),
+            ContentEncoding = httpResponseMessage.Headers.GetHeaderItemValue("content-encoding"),
+
+
         };
     }
 
@@ -63,7 +66,7 @@ public static class FileHelpers
         }
     }
 
-    public static bool IsFileTooLarge(byte[] data, long MaxLength)
+    internal static bool IsFileTooLarge(byte[] data, long MaxLength)
     {
         return data.Length >= MaxLength;
     }
