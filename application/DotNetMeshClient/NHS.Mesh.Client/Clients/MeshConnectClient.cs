@@ -56,8 +56,6 @@ public class MeshConnectClient : IMeshConnectClient
             var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,mailboxConfiguration.Password!,mailboxConfiguration.SharedKey!);
             httpRequestMessage.Headers.Add("authorization", authHeader);
             var result = await SendHttpRequest(httpRequestMessage,mailboxConfiguration);
-            var contentString = await result.Content.ReadAsStringAsync();
-            _logger.LogInformation(contentString);
             return result;
         }
         catch(Exception ex)
@@ -79,33 +77,25 @@ public class MeshConnectClient : IMeshConnectClient
 
         if(mailboxConfiguration.Cert != null)
         {
-            // byte[] pfxRawData = mailboxConfiguration.Cert.Export(X509ContentType.Pfx, "123456");
-
-            // using (X509Certificate2 pfxCertWithKey = new X509Certificate2(pfxRawData, "123456"))
-            // {
                 _logger.LogInformation("Adding Certificate to HTTP Call");
                 handler.ClientCertificateOptions = ClientCertificateOption.Manual;
                 handler.ClientCertificates.Add(mailboxConfiguration.Cert);
-                //handler.SslProtocols.Tls12;
                 handler.SslProtocols = SslProtocols.Tls12;
-                //if(httpRequestMessage.RequestUri.Host == "localhost"){
-                    handler.ServerCertificateCustomValidationCallback =
-                        (httpRequestMessage, cert, cetChain, policyErrors) =>
-                    {
-                            // It is possible to inspect the certificate provided by the server.
-                        _logger.LogInformation($"Requested URI: {httpRequestMessage.RequestUri}");
-                        _logger.LogInformation($"Effective date: {cert?.GetEffectiveDateString()}");
-                        _logger.LogInformation($"Exp date: {cert?.GetExpirationDateString()}");
-                        _logger.LogInformation($"Issuer: {cert?.Issuer}");
-                        _logger.LogInformation($"Subject: {cert?.Subject}");
+                handler.ServerCertificateCustomValidationCallback =
+                    (httpRequestMessage, cert, cetChain, policyErrors) =>
+                {
+                        // It is possible to inspect the certificate provided by the server.
+                    _logger.LogInformation($"Requested URI: {httpRequestMessage.RequestUri}");
+                    _logger.LogInformation($"Effective date: {cert?.GetEffectiveDateString()}");
+                    _logger.LogInformation($"Exp date: {cert?.GetExpirationDateString()}");
+                    _logger.LogInformation($"Issuer: {cert?.Issuer}");
+                    _logger.LogInformation($"Subject: {cert?.Subject}");
 
-                        // Based on the custom logic it is possible to decide whether the client considers certificate valid or not
-                        _logger.LogInformation($"Errors: {policyErrors}");
-                        _logger.LogWarning("Bypassing Server certificate Validation Check");
-                        return true;
-                    }; //ignores the ca for localhost testing
-                //}
-            //}
+                    // Based on the custom logic it is possible to decide whether the client considers certificate valid or not
+                    _logger.LogInformation($"Errors: {policyErrors}");
+                    _logger.LogWarning("Bypassing Server certificate Validation Check");
+                    return true;
+                };
         }
 
         httpClient = new HttpClient(handler)
