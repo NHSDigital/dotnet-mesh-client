@@ -1,107 +1,182 @@
-# Repository Template
+# dotnet-mesh-client
 
 [![CI/CD Pull Request](https://github.com/nhs-england-tools/repository-template/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/nhs-england-tools/repository-template/actions/workflows/cicd-1-pull-request.yaml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=repository-template&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=repository-template)
 
-Start with an overview or a brief description of what the project is about and what it does. For example -
-
-Welcome to our repository template designed to streamline your project setup! This robust template provides a reliable starting point for your new projects, covering an essential tech stack and encouraging best practices in documenting.
-
-This repository template aims to foster a user-friendly development environment by ensuring that every included file is concise and adequately self-documented. By adhering to this standard, we can promote increased clarity and maintainability throughout your project's lifecycle. Bundled within this template are resources that pave the way for seamless repository creation. Currently supported technologies are:
-
-- Terraform
-- Docker
-
-Make use of this repository template to expedite your project setup and enhance your productivity right from the get-go. Enjoy the advantage of having a well-structured, self-documented project that reduces overhead and increases focus on what truly matters - coding!
+A dotnet client for accessing the [NHS MESH API](https://digital.nhs.uk/developer/api-catalogue/message-exchange-for-social-care-and-health-api#api-description__end-to-end-process-to-integrate-with-mesh-api)
 
 ## Table of Contents
 
-- [Repository Template](#repository-template)
+- [dotnet mesh client](dotnet-mesh-client)
   - [Table of Contents](#table-of-contents)
   - [Setup](#setup)
     - [Prerequisites](#prerequisites)
     - [Configuration](#configuration)
   - [Usage](#usage)
+    - [Mesh Operation Service](#mesh-operation-service)
+    - [Mesh Inbox Service](#mesh-inbox-service)
+    - [Mesh Outbox Service](#mesh-outbox-service)
     - [Testing](#testing)
-  - [Design](#design)
-    - [Diagrams](#diagrams)
-    - [Modularity](#modularity)
-  - [Contributing](#contributing)
-  - [Contacts](#contacts)
+
   - [Licence](#licence)
 
 ## Setup
 
-By including preferably a one-liner or if necessary a set of clear CLI instructions we improve user experience. This should be a frictionless installation process that works on various operating systems (macOS, Linux, Windows WSL) and handles all the dependencies.
-
-Clone the repository
-
-```shell
-git clone https://github.com/nhs-england-tools/repository-template.git
-cd nhs-england-tools/repository-template
-```
-
 ### Prerequisites
 
-The following software packages, or their equivalents, are expected to be installed and configured:
+Currently this is not published to any nuget repository.
 
-- [Docker](https://www.docker.com/) container runtime or a compatible tool, e.g. [Podman](https://podman.io/),
-- [asdf](https://asdf-vm.com/) version manager,
-- [GNU make](https://www.gnu.org/software/make/) 3.82 or later,
-- [GNU coreutils](https://www.gnu.org/software/coreutils/) and [GNU binutils](https://www.gnu.org/software/binutils/) may be required to build dependencies like Python, which may need to be compiled during installation. For macOS users, this has been scripted and automated by the `dotfiles` project; please see this [script](https://github.com/nhs-england-tools/dotfiles/blob/main/assets/20-install-base-packages.macos.sh) for details,
-- [Python](https://www.python.org/) required to run Git hooks,
-- [`jq`](https://jqlang.github.io/jq/) a lightweight and flexible command-line JSON processor.
+To use this package within your dotnet solution we suggest using [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 
-> [!NOTE]<br>
-> The version of GNU make available by default on macOS is earlier than 3.82. You will need to upgrade it or certain `make` tasks will fail. On macOS, you will need [Homebrew](https://brew.sh/) installed, then to install `make`, like so:
->
-> ```shell
-> brew install make
-> ```
->
-> You will then see instructions to fix your `$PATH` variable to make the newly installed version available. If you are using [dotfiles](https://github.com/nhs-england-tools/dotfiles), this is all done for you.
+to pull down the repository using git submodules the below command `git submodule add https://github.com/NHSDigital/dotnet-mesh-client` in the directory you wish to pull down the solution into.
+
+the `NHS.Mesh.Client.csproj` should then be added to the solution file.
+then the client can be added as a project reference to any project which requires it.
 
 ### Configuration
 
-Installation and configuration of the toolchain dependencies
+The client needs to be registered as a service for Dependency Injection this can be done by using the below code:
 
-```shell
-make config
+the parameters will need to be updated for your specific mailboxes and environments.
+the certificate will need to be converted or created as a `.pfx` file that stores both the certificate and the private key.
+
+```c#
+        services.AddMeshClient(_ => _.MeshApiBaseUrl = 'MESHURL')
+            .AddMailbox("MYMAILBOX",new NHS.MESH.Client.Configuration.MailboxConfiguration
+            {
+                Password = "Password",
+                SharedKey = "SHAREDKEY",
+                Cert = new X509Certificate2("path to .pfx file","PFX File password")
+            })
+            .Build();
 ```
+
+Multiple mailboxes can be added by including more `.AddMailbox` methods to the builder and will be resolved when calling the various functions depending on the mailboxId passed to the function.
 
 ## Usage
 
-After a successful installation, provide an informative example of how this project can be used. Additional code snippets, screenshots and demos work well in this space. You may also link to the other documentation resources, e.g. the [User Guide](./docs/user-guide.md) to demonstrate more use cases and to show more features.
+To use all of the functions the needed service class will need to be injected in to the class which requires them as below
+To use functions in the mesh Operation Service this needs to injected in the code as below:
+
+```c#
+  public class ExampleService
+  {
+      private readonly IMeshOperationService _meshOperationService
+
+      public ExampleService(IMeshOperationService meshOperationService)
+      {
+          _meshOperationService = meshOperationService;
+      }
+
+      // methods in ExampleService that execute operation service methods.
+  }
+```
+
+The return type from these functions a `MeshResponse<T>` where T is the successful response data type.
+This response also contains an `IsSuccessful` flag which will indicate is the call to MESH returned a successful response.
+If the response is unsuccessful the `Error` property will contain a `APIErrorResponse` object that will have further information.
+Otherwise the response data will be within the `Response` property.
+
+### Mesh Operation Service
+
+To use this inject `IMeshOperationService` class as shown in [Usage](#usage).
+
+#### Handshake / Validate a mailbox
+
+Use this endpoint to check that MESH can be reached and that the authentication you are using is correct. This endpoint only needs to be called once every 24 hours. This endpoint updates the details of the connection history held for your mailbox and is similar to a keep-alive or ping message, in that it allows monitoring on the Spine to be aware of the active use of a mailbox despite a lack of traffic.
+
+to implement call the
+
+```c#
+    var result = await _meshOperationService.MeshHandshakeAsync(mailboxId);
+```
+
+This will return the Mailbox Id.
+
+### Mesh Inbox Service
+
+To use this inject `IMeshInboxService` class as shown in [Usage](#usage).
+This class contains methods used for receiving messages from MESH.
+
+#### Check an Inbox
+
+Returns the message identifier of messages in the mailbox inbox ready for download.
+to implement call the below:
+
+```c#
+    var result = await _meshInboxService.GetMessagesAsync(mailboxId);
+```
+
+this will return a list of MessageIds that are ready to download.
+
+#### Get Message By Id
+
+Retrieves a message based on the message identifier obtained from the 'GetMessagesAsync' method.
+Note this will not retrieve chunked messages.
+
+```c#
+    var result = await _meshInboxService.GetMessageByIdAsync(mailboxId, messageId);
+```
+
+The response to this will return a `GetMeshResponse` Object which will contain a `FileAttachment` & `MessageMetaData`
+
+#### Get Chunked Message By Id
+
+Retrieves a chunked message based on the message identifier obtained from the 'GetMessagesAsync' method.
+
+```c#
+    var result = await _meshInboxService.GetChunkedMessageByIdAsync(mailboxId, messageId);
+```
+
+The response to this will return a `GetMeshResponse` Object which will contain a `List<FileAttachment>` & `MessageMetaData`
+
+Note: the list of File Attachments can be passed to the helper method ReassembleChunkedFile as below which will return a File Attachment.
+
+```c#
+    var assembledFile = await FileHelpers.ReassembleChunkedFile(getMessageResponse.Response.FileAttachments);
+```
+
+#### Get Head Message By Id
+
+This method will retrieve a message metadata based on the message_id obtained from the 'GetMessagesAsync' method.
+
+```c#
+    var result = await _meshInboxService.GetHeadMessageByIdAsync(mailboxId, messageId);
+```
+
+this response will return an object with a `MessageMetaData` property.
+
+#### Acknowledge Message By Id
+
+This method will acknowledge the successful download of a message.
+
+```c#
+    var result = await _meshInboxService.AcknowledgeMessageByIdAsync(mailboxId, messageId);
+```
+
+this will return the Id of the message acknowledge.
+
+### Mesh Outbox Service
+
+To use this inject `IMeshOutboxService` class as shown in [Usage](#usage).
+This class contains methods used for sending messages to MESH.
+
+All of the sending methods will expect the below list of parameters
+
+| **Parameter Name** | **Data Type**  | **Required** | **Description**                                                                           |
+|--------------------|----------------|--------------|-------------------------------------------------------------------------------------------|
+| fromMailboxId      | string         | Y            | Sender mailbox Id                                                                         |
+| toMailboxId        | string         | Y            | Recipient mailbox ID                                                                      |
+| workFlowId         | string         | Y            | Identifies the type of message being sent e.g. Pathology, GP Capitation.                  |
+| file               | FileAttachment | Y            | contains the details of the file to be sent                                               |
+| localId            | string         | N            | local identifier, your reference                                                          |
+| subject            | string         | N            | additional message subject                                                                |
+| includeChecksum    | bool           | N            | By default this is false, if true a header will be added with an MD5 Checksum of the file |
+
 
 ### Testing
 
 There are `make` tasks for you to configure to run your tests.  Run `make test` to see how they work.  You should be able to use the same entry points for local development as in your CI pipeline.
-
-## Design
-
-### Diagrams
-
-The [C4 model](https://c4model.com/) is a simple and intuitive way to create software architecture diagrams that are clear, consistent, scalable and most importantly collaborative. This should result in documenting all the system interfaces, external dependencies and integration points.
-
-![Repository Template](./docs/diagrams/Repository_Template_GitHub_Generic.png)
-
-### Modularity
-
-Most of the projects are built with customisability and extendability in mind. At a minimum, this can be achieved by implementing service level configuration options and settings. The intention of this section is to show how this can be used. If the system processes data, you could mention here for example how the input is prepared for testing - anonymised, synthetic or live data.
-
-## Contributing
-
-Describe or link templates on how to raise an issue, feature request or make a contribution to the codebase. Reference the other documentation files, like
-
-- Environment setup for contribution, i.e. `CONTRIBUTING.md`
-- Coding standards, branching, linting, practices for development and testing
-- Release process, versioning, changelog
-- Backlog, board, roadmap, ways of working
-- High-level requirements, guiding principles, decision records, etc.
-
-## Contacts
-
-Provide a way to contact the owners of this project. It can be a team, an individual or information on the means of getting in touch via active communication channels, e.g. opening a GitHub discussion, raising an issue, etc.
 
 ## Licence
 
