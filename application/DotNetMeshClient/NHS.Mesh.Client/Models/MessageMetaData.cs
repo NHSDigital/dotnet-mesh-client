@@ -9,5 +9,6 @@ public class MessageMetaData
     public string? FileName { get; set; }
     public string? MessageType { get; set; }
     public string? ChunkRange  {get; set;}
+    public string? ContentEncoding {get;set;}
     public int? TotalChunks { get; set;}
 }

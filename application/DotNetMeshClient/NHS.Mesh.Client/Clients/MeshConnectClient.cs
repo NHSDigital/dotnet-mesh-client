@@ -7,6 +7,7 @@
 
 namespace NHS.MESH.Client.Clients;
 
+using Microsoft.Extensions.Logging;
 using NHS.MESH.Client.Configuration;
 using NHS.MESH.Client.Contracts.Clients;
 using NHS.MESH.Client.Contracts.Configurations;
@@ -15,6 +16,8 @@ using NHS.MESH.Client.Models;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 
 /// <summary>The MESH connect client for MESH API calls.</summary>
 public class MeshConnectClient : IMeshConnectClient
@@ -27,13 +30,16 @@ public class MeshConnectClient : IMeshConnectClient
 
     private readonly MailboxConfigurationResolver _mailboxConfigurationResolver;
 
+    private readonly ILogger<MeshConnectClient> _logger;
+
     /// <summary>Initializes a new instance of the <see cref="MeshConnectClient"/> class.</summary>
     /// <param name="httpClientFactory">The HTTP Client.</param>
     /// <param name="meshConnectConfiguration">The MESH Connect Configuration.</param>
-    public MeshConnectClient(IMeshConnectConfiguration meshConnectConfiguration, MailboxConfigurationResolver mailboxConfigurationResolver)
+    public MeshConnectClient(IMeshConnectConfiguration meshConnectConfiguration, MailboxConfigurationResolver mailboxConfigurationResolver, ILogger<MeshConnectClient> logger)
     {
         _meshConnectConfiguration = meshConnectConfiguration;
         _mailboxConfigurationResolver = mailboxConfigurationResolver;
+        _logger = logger;
     }
 
     /// <summary>
@@ -43,11 +49,20 @@ public class MeshConnectClient : IMeshConnectClient
     /// <returns></returns>
     public async Task<HttpResponseMessage> SendRequestAsync(HttpRequestMessage httpRequestMessage, string mailboxId)
     {
-        MailboxConfiguration mailboxConfiguration = _mailboxConfigurationResolver.GetMailboxConfiguration(mailboxId);
-        var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,mailboxConfiguration.Password!,mailboxConfiguration.SharedKey!);
-        httpRequestMessage.Headers.Add("authorization", authHeader);
-
-        return await SendHttpRequest(httpRequestMessage,mailboxConfiguration);
+        try
+        {
+            _logger.LogInformation($"Sending HttpRequest to mesh: { httpRequestMessage.RequestUri }");
+            MailboxConfiguration mailboxConfiguration = _mailboxConfigurationResolver.GetMailboxConfiguration(mailboxId);
+            var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,mailboxConfiguration.Password!,mailboxConfiguration.SharedKey!);
+            httpRequestMessage.Headers.Add("authorization", authHeader);
+            var result = await SendHttpRequest(httpRequestMessage,mailboxConfiguration);
+            return result;
+        }
+        catch(Exception ex)
+        {
+            _logger.LogCritical(ex,"Exception encountered while calling MESH API");
+            throw;
+        }
     }
 
 
@@ -62,16 +77,25 @@ public class MeshConnectClient : IMeshConnectClient
 
         if(mailboxConfiguration.Cert != null)
         {
-            var certificate = mailboxConfiguration.Cert;
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ClientCertificates.Add(certificate);
-            if(httpRequestMessage.RequestUri.Host == "localhost"){
+                _logger.LogInformation("Adding Certificate to HTTP Call");
+                handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+                handler.ClientCertificates.Add(mailboxConfiguration.Cert);
+                handler.SslProtocols = SslProtocols.Tls12;
                 handler.ServerCertificateCustomValidationCallback =
                     (httpRequestMessage, cert, cetChain, policyErrors) =>
                 {
+                        // It is possible to inspect the certificate provided by the server.
+                    _logger.LogInformation($"Requested URI: {httpRequestMessage.RequestUri}");
+                    _logger.LogInformation($"Effective date: {cert?.GetEffectiveDateString()}");
+                    _logger.LogInformation($"Exp date: {cert?.GetExpirationDateString()}");
+                    _logger.LogInformation($"Issuer: {cert?.Issuer}");
+                    _logger.LogInformation($"Subject: {cert?.Subject}");
+
+                    // Based on the custom logic it is possible to decide whether the client considers certificate valid or not
+                    _logger.LogInformation($"Errors: {policyErrors}");
+                    _logger.LogWarning("Bypassing Server certificate Validation Check");
                     return true;
-                }; //ignores the ca for localhost testing
-            }
+                };
         }
 
         httpClient = new HttpClient(handler)
