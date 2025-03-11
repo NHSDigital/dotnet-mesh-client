@@ -51,54 +51,59 @@ public class MeshConnectClient : IMeshConnectClient
     {
         try
         {
-            _logger.LogInformation($"Sending HttpRequest to mesh: { httpRequestMessage.RequestUri }");
+            _logger.LogInformation($"Sending HttpRequest to mesh: {httpRequestMessage.RequestUri}");
             MailboxConfiguration mailboxConfiguration = _mailboxConfigurationResolver.GetMailboxConfiguration(mailboxId);
-            var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId,mailboxConfiguration.Password!,mailboxConfiguration.SharedKey!);
+            var authHeader = MeshAuthorizationHelper.GenerateAuthHeaderValue(mailboxId, mailboxConfiguration.Password!, mailboxConfiguration.SharedKey!);
             httpRequestMessage.Headers.Add("authorization", authHeader);
-            var result = await SendHttpRequest(httpRequestMessage,mailboxConfiguration);
+            var result = await SendHttpRequest(httpRequestMessage, mailboxConfiguration);
             return result;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            _logger.LogCritical(ex,"Exception encountered while calling MESH API");
+            _logger.LogCritical(ex, "Exception encountered while calling MESH API");
             throw;
         }
     }
 
 
-    private async Task<HttpResponseMessage> SendHttpRequest(HttpRequestMessage httpRequestMessage,MailboxConfiguration mailboxConfiguration)
+    private async Task<HttpResponseMessage> SendHttpRequest(HttpRequestMessage httpRequestMessage, MailboxConfiguration mailboxConfiguration)
     {
 
         using var handler = new HttpClientHandler();
         httpRequestMessage = AddHeaders(httpRequestMessage);
         var timeInSeconds = _meshConnectConfiguration.TimeoutInSeconds;
 
-        HttpClient httpClient;
 
-        if(mailboxConfiguration.Cert != null)
+        if (mailboxConfiguration.Cert != null)
         {
-                _logger.LogInformation("Adding Certificate to HTTP Call");
-                handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-                handler.ClientCertificates.Add(mailboxConfiguration.Cert);
-                handler.SslProtocols = SslProtocols.Tls12;
-                handler.ServerCertificateCustomValidationCallback =
-                    (httpRequestMessage, cert, cetChain, policyErrors) =>
+            _logger.LogInformation("Adding Certificate to HTTP Call");
+            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            handler.ClientCertificates.Add(mailboxConfiguration.Cert);  // this is the pfx file built from the private key and client cert
+            handler.SslProtocols = SslProtocols.Tls12;
+            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, chain, sslPolicyErrors) =>
+            {
+                if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
                 {
-                        // It is possible to inspect the certificate provided by the server.
-                    _logger.LogInformation($"Requested URI: {httpRequestMessage.RequestUri}");
-                    _logger.LogInformation($"Effective date: {cert?.GetEffectiveDateString()}");
-                    _logger.LogInformation($"Exp date: {cert?.GetExpirationDateString()}");
-                    _logger.LogInformation($"Issuer: {cert?.Issuer}");
-                    _logger.LogInformation($"Subject: {cert?.Subject}");
+                    return true; // Everything is fine
+                }
 
-                    // Based on the custom logic it is possible to decide whether the client considers certificate valid or not
-                    _logger.LogInformation($"Errors: {policyErrors}");
-                    _logger.LogWarning("Bypassing Server certificate Validation Check");
-                    return true;
-                };
+                chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+
+                // Manually add the CA certificates to the chain
+                foreach (var caCert in mailboxConfiguration.serverSideCertCollection)
+                {
+                    chain.ChainPolicy.CustomTrustStore.Add(caCert);
+                }
+                if (cert != null)
+                {
+                    // Rebuild the chain with added certs
+                    return chain.Build(cert);
+                }
+                return false;
+            };
         }
 
-        httpClient = new HttpClient(handler)
+        var httpClient = new HttpClient(handler)
         {
             Timeout = TimeSpan.FromSeconds(timeInSeconds)
         };
