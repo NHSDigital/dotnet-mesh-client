@@ -23,7 +23,7 @@ indent_size = unset
 [*.py]
 indent_size = 4
 
-[.yaml]
+[*.yaml]
 indent_size = unset
 
 [{Dockerfile,Dockerfile.}*]
