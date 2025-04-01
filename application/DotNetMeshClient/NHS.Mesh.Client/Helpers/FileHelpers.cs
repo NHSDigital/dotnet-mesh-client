@@ -94,8 +94,16 @@ public static class FileHelpers
                 {
                     throw new ArgumentException("List was missing Chunks Cannot reassemble");
                 }
-                var decompressedData = GZIPHelpers.DeCompressBuffer(file.Content);
-                await memoryStream.WriteAsync(decompressedData);
+
+                if(file.ContentType == "GZIP")
+                {
+                    var decompressedData = GZIPHelpers.DeCompressBuffer(file.Content);
+                    await memoryStream.WriteAsync(decompressedData);
+                }
+                else
+                {
+                    await memoryStream.WriteAsync(file.Content);
+                }
                 expectedChunkNumber++;
             }
             return new FileAttachment
