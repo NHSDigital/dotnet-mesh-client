@@ -39,6 +39,7 @@ The client needs to be registered as a service for Dependency Injection this can
 
 the parameters will need to be updated for your specific mailboxes and environments.
 the certificate will need to be converted or created as a `.pfx` file that stores both the certificate and the private key.
+the serverSideCertificateCollection should be populated with the certificates of the MESH side server, This is to ensure the host connected to is the expected host.
 
 ```c#
         services.AddMeshClient(_ => _.MeshApiBaseUrl = 'MESHURL')
@@ -46,7 +47,8 @@ the certificate will need to be converted or created as a `.pfx` file that store
             {
                 Password = "Password",
                 SharedKey = "SHAREDKEY",
-                Cert = new X509Certificate2("path to .pfx file","PFX File password")
+                Cert = new X509Certificate2("path to .pfx file","PFX File password"),
+                serverSideCertCollection = new X509Certificate2Collection()
             })
             .Build();
 ```
