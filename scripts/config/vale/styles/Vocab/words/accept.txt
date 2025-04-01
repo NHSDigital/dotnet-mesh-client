@@ -15,3 +15,8 @@ idempotence
 onboarding
 toolchain
 [A-Z]+s
+dotnet
+nuget
+mailboxId
+localId
+bool
