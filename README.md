@@ -175,7 +175,6 @@ All of the sending methods will expect the below list of parameters
 | subject            | string         | N            | additional message subject                                                                |
 | includeChecksum    | bool           | N            | By default this is false, if true a header will be added with an MD5 Checksum of the file |
 
-
 ### Testing
 
 There are `make` tasks for you to configure to run your tests.  Run `make test` to see how they work.  You should be able to use the same entry points for local development as in your CI pipeline.
