@@ -111,14 +111,14 @@ public class MeshConnectClient : IMeshConnectClient
                 }
 
                 bool isValidCA = mailboxConfiguration.serverSideCertCollection
-                    .Any(caCert => caCert.Thumbprint == cert.Issuer);
+                    .Any(caCert => caCert.Thumbprint == cert.Thumbprint);
                 if (!isValidCA)
                 {
                     _logger.LogError("Server certificate is not issued by a trusted CA!");
                     return false;
                 }
 
-                return true;;
+                return true;
 
             };
         }
