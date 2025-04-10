@@ -28,7 +28,8 @@ public class MeshMailboxBuilder
             MeshApiInboxUriPath = "inbox",
             MeshApiOutboxUriPath = "outbox",
             MeshApiAcknowledgeUriPath = "status/acknowledged",
-            ChunkSize = 19 * 1024 * 1024// below the 20mb limit for external
+            ChunkSize = 19 * 1024 * 1024,// below the 20mb limit for external
+            BypassServerCertificateValidation = false
         };
 
         options(_meshConnectConfiguration);

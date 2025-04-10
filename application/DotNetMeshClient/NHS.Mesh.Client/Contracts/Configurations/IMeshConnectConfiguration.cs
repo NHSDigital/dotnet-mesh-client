@@ -53,4 +53,6 @@ public interface IMeshConnectConfiguration
     bool ProxyUseDefaultCredentials { get; set; }
     /// <summary>Gets the chunk size in bytes for sending chunked messages 19Mb limit outside of HSCN 100Mb limit within</summary>
     int ChunkSize { get; set; }
+    /// <summary>Flag if the Servers Certificate is Checked against the CA Chain</summary>
+    public bool BypassServerCertificateValidation { get; set; }
 }

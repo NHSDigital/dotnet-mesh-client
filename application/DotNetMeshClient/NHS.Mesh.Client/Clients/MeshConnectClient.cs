@@ -82,7 +82,13 @@ public class MeshConnectClient : IMeshConnectClient
             handler.SslProtocols = SslProtocols.Tls12;
             handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, chain, sslPolicyErrors) =>
             {
-                if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
+
+                if(_meshConnectConfiguration.BypassServerCertificateValidation)
+                {
+                    _logger.LogWarning("Bypassing Server Certificate Validation");
+                    return true;
+                }
+                else if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
                 {
                     return true; // Everything is fine
                 }
