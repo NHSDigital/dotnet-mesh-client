@@ -82,7 +82,13 @@ public class MeshConnectClient : IMeshConnectClient
             handler.SslProtocols = SslProtocols.Tls12;
             handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, chain, sslPolicyErrors) =>
             {
-                if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
+
+                if(_meshConnectConfiguration.BypassServerCertificateValidation)
+                {
+                    _logger.LogWarning("Bypassing Server Certificate Validation");
+                    return true;
+                }
+                else if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
                 {
                     return true; // Everything is fine
                 }
@@ -94,12 +100,26 @@ public class MeshConnectClient : IMeshConnectClient
                 {
                     chain.ChainPolicy.CustomTrustStore.Add(caCert);
                 }
-                if (cert != null)
+                if (cert == null)
                 {
-                    // Rebuild the chain with added certs
-                    return chain.Build(cert);
+                    return false;
                 }
-                return false;
+                // Rebuild the chain with added certs
+                if (!chain.Build(cert))
+                {
+                    return false;
+                }
+
+                bool isValidCA = mailboxConfiguration.serverSideCertCollection
+                    .Any(caCert => caCert.Thumbprint == cert.Thumbprint);
+                if (!isValidCA)
+                {
+                    _logger.LogError("Server certificate is not issued by a trusted CA!");
+                    return false;
+                }
+
+                return true;
+
             };
         }
 
