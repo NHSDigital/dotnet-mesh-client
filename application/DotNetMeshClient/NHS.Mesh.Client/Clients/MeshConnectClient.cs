@@ -100,12 +100,26 @@ public class MeshConnectClient : IMeshConnectClient
                 {
                     chain.ChainPolicy.CustomTrustStore.Add(caCert);
                 }
-                if (cert != null)
+                if (cert == null)
                 {
-                    // Rebuild the chain with added certs
-                    return chain.Build(cert);
+                    return false;
                 }
-                return false;
+                // Rebuild the chain with added certs
+                if (!chain.Build(cert))
+                {
+                    return false;
+                }
+
+                bool isValidCA = mailboxConfiguration.serverSideCertCollection
+                    .Any(caCert => caCert.Thumbprint == cert.Issuer);
+                if (!isValidCA)
+                {
+                    _logger.LogError("Server certificate is not issued by a trusted CA!");
+                    return false;
+                }
+
+                return true;;
+
             };
         }
 
